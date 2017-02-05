@@ -1,0 +1,20 @@
+{
+	"name" : "GESMO",
+	"description" : "Leap Motion Controlled Online Music Player.",
+	"version" : "0.1",
+	"manifest_version": 2,
+	"app": {
+		"background": {
+			"scripts": [
+				"js/three.js",
+				"js/tween.min.js",
+				"js/OrbitControls.js",
+				"js/TrackballControls.js",
+				"js/THREEx.KeyboardState.js",
+				"js/stats.js",
+				"background.js"
+				]
+		}
+	},
+	"icons": { "16": "calculator-16.png", "128": "calculator-128.png"}
+}
