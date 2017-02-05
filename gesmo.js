@@ -258,7 +258,7 @@ var table = [
 
 				}
 
-				renderer = new THREE.WebGLRenderer( { alpha: 1, antialias: true, clearColor: 0xffffff } );
+				renderer = new THREE.WebGLRenderer( { alpha: 1, antialias: true, clearColor: 0x000000 } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.domElement.style.position = 'absolute';
 				renderer.domElement.style.top = 0;
@@ -390,8 +390,8 @@ var table = [
 				camera.position.z = cameraOffset.z;
 				camera.lookAt( hand.position );
 				
-				//camera.updateMatrix();
-				//camera.updateProjectionMatrix();
+				camera.updateMatrix();
+				camera.updateProjectionMatrix();
 						
 				stats.update();
 			}
