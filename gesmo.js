@@ -121,8 +121,9 @@ var table = [
 
 			var camera, scene, renderer;
 			var geometry, material, mesh;
-			var keyboard = new THREEx.KeyboardState();
 			var clock = new THREE.Clock();
+
+			var controller;
 
 			var controls;
 
@@ -264,9 +265,20 @@ var table = [
 				renderer.domElement.style.top = 0;
 				document.getElementById( 'container' ).appendChild( renderer.domElement );
 
-				controls = new THREE.TrackballControls( camera, renderer.domElement );
-				controls.rotateSpeed = 0.5;
-				controls.addEventListener( 'change', render );
+				controller = new Leap.Controller()
+				    .use('riggedHand');
+
+				controller.connect();
+
+				controls = new THREE.GesmoControls( camera , controller , scene );
+				controls.translationSpeed   = 20;
+				controls.translationDecay   = 0.3;
+				controls.scaleDecay         = 0.5;
+				controls.rotationSlerp      = 0.8;
+				controls.rotationSpeed      = 4;
+				controls.pinchThreshold     = 0.5;
+				controls.transSmoothing     = 0.5;
+				controls.rotationSmoothing  = 0.2;
 
 				var button = document.getElementById( 'table' );
 				button.addEventListener( 'click', function ( event ) {
@@ -296,7 +308,7 @@ var table = [
 
 				}, false );
 
-				transform( targets.table, 5000 );
+				transform( targets.sphere, 5000 );
 
 
 				window.addEventListener('resize', onWindowResize, false);
@@ -340,11 +352,10 @@ var table = [
 			function animate() {
 
 				requestAnimationFrame( animate );
-				render();
-				update();
-				TWEEN.update();
+				//render();
 				controls.update();
-
+				TWEEN.update();
+				renderer.render( scene, camera );
 			}
 
 			function update(){

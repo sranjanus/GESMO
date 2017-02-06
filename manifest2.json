@@ -6,12 +6,6 @@
 	"app": {
 		"background": {
 			"scripts": [
-				"js/three.js",
-				"js/tween.min.js",
-				"js/OrbitControls.js",
-				"js/TrackballControls.js",
-				"js/THREEx.KeyboardState.js",
-				"js/stats.js",
 				"background.js"
 				]
 		}
