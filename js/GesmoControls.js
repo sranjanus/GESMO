@@ -90,7 +90,7 @@ THREE.GesmoControls = (function () {
           // }
       } else if(whichHand == 1){
           // this is were player event should be triggered
-
+          
       } else {
           // rotation
           if (this.shouldRotate(anchorHands, hands)) {
