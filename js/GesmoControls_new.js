@@ -85,9 +85,9 @@
       	 		this.applyRotation(anchorHands, hands);
       	 	}
 
-                  // if(this.shouldPick(anchorHands, hands)){
-                  //       this.pick(anchorHands, hands);
-                  // }
+          if(this.shouldPick(anchorHands, hands)){
+            this.pick(anchorHands, hands);
+          }
       	 }
 
       	 this.camera.position.add(this.translationMomentum);
@@ -104,13 +104,7 @@
       }
 
       GesmoControls.prototype.shouldRotate = function(anchorHands, hands){
-      	  if (anchorHands.length == 2 && hands.length == 2){
-      	  		var hand = (hands[0].type == "left") ? hands[0] : hands[1];
-      	  		if(this.isEngaged(hand)){
-      	  			return true;
-      	  		}
-      	  }
-      	  return false;
+           return (hands.length == 1) && (hands[0].type == "left") && (!this.isEngaged(hands[0]));
       }
 
       GesmoControls.prototype.shouldPick = function(anchorHands, hands){
@@ -125,16 +119,8 @@
 
       }
 
-      GesmoControls.prototype.shouldPlayorPause = function(anchorHands, hands){
-
-      }
-
-      GesmoControls.prototype.shouldMoveToNext = function(anchorHands, hands){
-
-      }
-
-      GesmoControls.prototype.shouldMoveToPrevious = function(anchorHands, hands){
-
+      GesmoControls.prototype.shouldControlMusic = function(anchorHands, hands){
+        return (hands.length == 1) && (hands[0].type == "right") && (!this.isEngaged(hands[0]));
       }
 
       GesmoControls.prototype.applyTranslation = function(anchorHands, hands){

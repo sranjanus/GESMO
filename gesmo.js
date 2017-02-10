@@ -12,7 +12,7 @@
 			var musicBox;
 
 			init();
-			animate();
+			//animate();
 
 
 			function init(){
@@ -24,8 +24,8 @@
 				var geometry = new THREE.BoxGeometry( 400, 400, 400 );
 				var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
 				musicBox = new THREE.Mesh( geometry, material );
+
 				scene.add( musicBox );
-				musicBox.position.y = -1400;
 
 				for(var i = 0;i < artists.length;i++){
 
@@ -46,7 +46,7 @@
 					itemMesh.position.z = itemMesh1.position.z = musicBox.position.z;
 
 					objects.push( itemMesh );
-					scene.add(itemMesh);
+					musicBox.add(itemMesh);
 					mTargets.push(itemMesh1);
 
 				}
@@ -87,11 +87,11 @@
 				document.getElementById( 'container' ).appendChild( renderer.domElement );
 
 				controller = new Leap.Controller({enableGestures: true})
-				/*.use('transform', {
+				.use('transform', {
 					position: new THREE.Vector3(0, 0, -400),
 					effectiveParent: camera
-				})*/
-				.use('riggedHand');/*, {
+				})
+				.use('riggedHand', {
 				    parent: scene,
 				    renderer: renderer,
 				    renderFn: function() {
@@ -101,17 +101,17 @@
 				    },
 				    camera: camera,
 				    checkWebGL: true
-				});*/
+				});
 
 				controller.connect();
 
-				controls = new THREE.GesmoControls( camera, controller, scene, posSphere);
+				controls = new THREE.GesmoControls( musicBox, controller, false, posSphere);
 				controls.translationSpeed   = 10;
 				controls.translationDecay   = 0.3;
 				controls.scaleDecay         = 0.5;
 				controls.rotationSlerp      = 0.8;
 				controls.rotationSpeed      = 4;
-				controls.pinchThreshold     = 0.75;
+				controls.pinchThreshold     = 0.9;
 				controls.transSmoothing     = 0.1;
 				controls.rotationSmoothing  = 0.2;
 
@@ -144,7 +144,7 @@
 						itemMesh.position.z = itemMesh1.position.z = musicBox.position.z;
 
 						objects.push( itemMesh );
-						scene.add(itemMesh);
+						musicBox.add(itemMesh);
 						mTargets.push(itemMesh1);
 
 					}
@@ -207,7 +207,7 @@
 						itemMesh.position.z = itemMesh1.position.z = musicBox.position.z;
 
 						objects.push( itemMesh );
-						scene.add(itemMesh);
+						musicBox.add(itemMesh);
 						mTargets.push(itemMesh1);
 
 					}
@@ -272,7 +272,7 @@
 						itemMesh.position.z = itemMesh1.position.z = musicBox.position.z;
 
 						objects.push( itemMesh );
-						scene.add(itemMesh);
+						musicBox.add(itemMesh);
 						mTargets.push(itemMesh1);
 
 					}
@@ -328,7 +328,7 @@
 						itemMesh.position.z = itemMesh1.position.z = musicBox.position.z;
 
 						objects.push( itemMesh );
-						scene.add(itemMesh);
+						musicBox.add(itemMesh);
 						mTargets.push(itemMesh1);
 
 					}
@@ -431,6 +431,6 @@
 
 			function removeObjects(){
 				for ( var i = 0; i < objects.length; i ++ ) {
-						scene.remove(objects[i]);
+						musicBox.remove(objects[i]);
 				}
 			}
