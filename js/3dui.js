@@ -3,20 +3,28 @@ var camera, scene, renderer;
 // only for mouse interaction-------
 var raycaster, mouse;
 var clock = new THREE.Clock();
+var isLeftDragging = false;
+var isRightDragging = false;
+var previousMousePosition = {
+	x: 0,
+	y: 0
+};
+var tsOffset;
 //----------------------------------
-
-var libElements = [];
-var libObject;
-var targets = [];
+var dataController;
 var searchQueue = [];
 
-var dataController;
 var navController;
 var clock;
 
-var musicBox;
-var musicBoxBack;
-var musicBoxQ;
+var ui_musicBox;
+var ui_musicPlayer;
+var ui_musicBoxBack;
+var ui_musicBoxQ;
+var libObject;
+var libElements = [];
+var targets = [];
+
 var songQueue = [];
 
 var titleFont, subTitleFont, descFont;
@@ -35,28 +43,33 @@ function init(){
 	camera.position.z = 4800;
 	camera.lookAt( scene.position );
 
-	//add the music box to the scene
+	//add the music box and it's elements to the scene
+	ui_musicBox = new THREE.Object3D();
+	scene.add(ui_musicBox);
+
+	//music box element - the player
 	var geometry = new THREE.BoxGeometry( 5000, 800, 200 );
 	var material = new THREE.MeshLambertMaterial( {color: 0x00ff00} );
-	musicBox = new THREE.Mesh( geometry, material );
-	scene.add( musicBox );
-	musicBox.position.y = 3100;
+	ui_musicPlayer = new THREE.Mesh( geometry, material );
+	ui_musicBox.add( ui_musicPlayer );
+	ui_musicPlayer.position.y = 3100;
+
 	var gGeom = new THREE.BoxGeometry( 800, 250, 100);
 	var gMat = new THREE.MeshLambertMaterial( { color: 0x0000fff});
-	musicBoxQ = new THREE.Mesh(gGeom, gMat);
-	musicBox.add(musicBoxQ);
-	musicBoxQ.position.z =  musicBox.position.z + 90;
-	musicBoxQ.position.y = musicBox.position.y - 3650;
-	musicBoxQ.info = {
+	ui_musicBoxQ = new THREE.Mesh(gGeom, gMat);
+	ui_musicPlayer.add(ui_musicBoxQ);
+	ui_musicBoxQ.position.z =  ui_musicPlayer.position.z + 90;
+	ui_musicBoxQ.position.y = ui_musicPlayer.position.y - 3650;
+	ui_musicBoxQ.info = {
 		type: "queue"
 	};
 
 	var bGeom = new THREE.BoxGeometry(400, 400, 10);
 	var bMat = new THREE.MeshLambertMaterial({color: 0x00ff00});
-	musicBoxBack = new THREE.Mesh( bGeom, bMat);
-	scene.add( musicBoxBack );
-	musicBoxBack.position.y = -3200;
-	musicBoxBack.info = {
+	ui_musicBoxBack = new THREE.Mesh( bGeom, bMat);
+	ui_musicBox.add( ui_musicBoxBack );
+	ui_musicBoxBack.position.y = -3200;
+	ui_musicBoxBack.info = {
 		type: "back"
 	};
 
@@ -78,7 +91,7 @@ function init(){
 
 	//load the library to the scene
 	libObject = new THREE.Object3D();
-	scene.add(libObject);
+	ui_musicBox.add(libObject);
 
 	// initialize data controller for fetching data 
 	dataController = new DataController();
@@ -86,10 +99,13 @@ function init(){
 	// initialize navigation controller for navigating the scene
 	// for mouse/keyboard interaction---------------------
 	navController = new THREE.TrackballControls(camera);
+	navController.noRotate = true;
+	navController.noPan = true;
 	clock = new THREE.Clock();
 	mouse = new THREE.Vector2();
 	var radius = 100, theta = 0;
 	raycaster = new THREE.Raycaster();
+	tsOffset = new THREE.Vector3();
 	//----------------------------------------------------
 
 	//load fonts
@@ -109,9 +125,11 @@ function init(){
 	renderer.sortObjects = false;
 	document.getElementById( 'container' ).appendChild( renderer.domElement );
 
+	// add event listener
+	document.addEventListener('mousedown', onDocumentMouseDown, false);
+	document.addEventListener('mouseup', onDocumentMouseUp, false);
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 	document.addEventListener('click', onDocumentClick, false);
-
 	window.addEventListener('resize', onWindowResize, false);
 
 	//var loader = new THREE.PLYLoader();
@@ -153,7 +171,6 @@ function initFont(type, font){
 
 // function to load the music box
 function createMusicBox(geom){
-	console.log(geom);
 	var mat = new THREE.MeshLambertMaterial({color: 0x7777ff});
 	// loadedMesh.children.forEach(function(child){
 	// 	child.material = mat;
@@ -161,11 +178,9 @@ function createMusicBox(geom){
 	// 	child.geometry.computeVertexNormals();
 	// });
 	// loadedMesh.scale.set(1, 1, 1);
-    musicBox = new THREE.Mesh(geom, mat);
-    scene.add(musicBox);
-    musicBox.position.x = -3000;
-
-    console.log(musicBox);
+    ui_musicPlayer = new THREE.Mesh(geom, mat);
+    ui_musicBox.add(ui_musicPlayer);
+    ui_musicPlayer.position.x = -3000;
 
     var fontLoader = new THREE.FontLoader();
 	fontLoader.load("fonts/helvetiker_bold.typeface.json", function(font){
@@ -193,9 +208,9 @@ function loadLibrary(type, data){
 	for(var i = 0;i < data.length;i++){
 		var itemMesh = createLibraryElements(data[i], type);
 
-		itemMesh.position.x = musicBox.position.x;
-		itemMesh.position.y = musicBox.position.y;
-		itemMesh.position.z = musicBox.position.z;
+		itemMesh.position.x = ui_musicPlayer.position.x;
+		itemMesh.position.y = ui_musicPlayer.position.y;
+		itemMesh.position.z = ui_musicPlayer.position.z;
 
 		libElements.push(itemMesh);
 		libObject.add(itemMesh);
@@ -208,8 +223,6 @@ function loadLibrary(type, data){
 	setTimeout(function(){ 
 		transform(targets, 2000)
 	}, 2000);
-
-	//targets.length = 0;
 }
 
 function onLoadFail(){
@@ -217,13 +230,11 @@ function onLoadFail(){
 }
 
 function removeCurrentObjs(){
-	console.log('here4');
 	//transform(musicBox, 2000);
 	for(var i = 0;i < libElements.length;i++){
 		libObject.remove(libElements[i]);
 	}
 	libElements.length = 0;
-	console.log('here5');
 }
 
 function createLibraryElements(data, type){
@@ -379,81 +390,14 @@ function transform( targets, duration ) {
 	return this;
 }
 
-function onWindowResize(){
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-
-	renderer.setSize(window.innerWidth, window.innerHeight);
+function highlightElement(element){
+	highlighted.currentHex = highlighted.material.emissive.getHex();
+	highlighted.material.emissive.setHex(0xff0000);
 }
 
-// for mouse interaction---------------------------------------------
-function onDocumentMouseMove(event){
-	event.preventDefault();
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-	raycaster.setFromCamera( mouse, camera );
-	var objectsArray = [];
-	objectsArray.push(musicBoxBack);
-	objectsArray.push(musicBoxQ);
-	for(var i = 0;i < libElements.length;i++){
-		objectsArray.push(libElements[i]);
-	}
-
-	var intersects = raycaster.intersectObjects( objectsArray );
-
-	if ( intersects.length > 0 ) {
-
-		if ( highlighted != intersects[0].object ) {
-
-			if(highlighted != null) { removeHighlight(highlighted); }
-			highlighted = intersects[0].object;
-			highlightElement(highlighted);
-
-		}
-	} else {
-		if(highlighted != null) { removeHighlight(highlighted); }
-		highlighted = null;
-	}
+function removeHighlight(element){
+	highlighted.material.emissive.setHex( highlighted.currentHex );
 }
-
-function onDocumentClick(event){
-	event.preventDefault();
-
-	if(highlighted != null){
-		if(highlighted.info.type == "queue"){
-			showQueue();
-		} else if(highlighted.info.type == "back"){
-			if(searchQueue.length > 1){
-				searchQueue.pop();
-				fetchLibrary(searchQueue.pop());
-			}
-		} else {
-			var selectedType = highlighted.info.type;
-			var searchQuery = {
-					filterName: null,
-					filterValue: null
-			};
-
-			switch(selectedType){
-				case "artists" : {
-						searchQuery.type = "songs";
-						fetchLibrary(searchQuery);
-						break;
-					}
-				case "albums" : {
-						console.log('here');
-						searchQuery.type = "songs";
-						fetchLibrary(searchQuery);
-						break;
-					}
-				case "songs" : queueSong(highlighted);
-					break;
-			}
-		}
-	}
-}
-//-------------------------------------------------------------------
 
 function queueSong(item){
 	var copy = item.clone();
@@ -462,7 +406,7 @@ function queueSong(item){
 	TWEEN.removeAll();
 
 	var tween = new TWEEN.Tween( copy.position )
-			.to( { x: musicBox.position.x, y: musicBox.position.y, z: musicBox.position.z }, Math.random() * 1000 + 1000 )
+			.to( { x: ui_musicPlayer.position.x, y: ui_musicPlayer.position.y, z: ui_musicPlayer.position.z }, Math.random() * 1000 + 1000 )
 			.easing( TWEEN.Easing.Exponential.InOut )
 			.onComplete(function(){
 				scene.remove(copy);
@@ -485,9 +429,9 @@ function showQueue(){
 		for(var i = 0;i < songQueue.length;i++){
 			var itemMesh = songQueue[i];
 
-			itemMesh.position.x = musicBox.position.x;
-			itemMesh.position.y = musicBox.position.y;
-			itemMesh.position.z = musicBox.position.z;
+			itemMesh.position.x = ui_musicPlayer.position.x;
+			itemMesh.position.y = ui_musicPlayer.position.y;
+			itemMesh.position.z = ui_musicPlayer.position.z;
 
 			libElements.push(itemMesh);
 			libObject.add(itemMesh);
@@ -503,6 +447,148 @@ function showQueue(){
 	}
 }
 
+function onWindowResize(){
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+
+	renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// for mouse interaction---------------------------------------------
+function onDocumentMouseDown(event){
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+		raycaster.setFromCamera( mouse, camera );
+	
+	if(event.button == 0){
+		var objectsArray = [];
+		objectsArray.push(ui_musicBoxBack);
+		objectsArray.push(ui_musicBoxQ);
+		for(var i = 0;i < libElements.length;i++){
+			objectsArray.push(libElements[i]);
+		}
+
+		var intersects = raycaster.intersectObjects( objectsArray );
+
+		if(intersects.length == 0){
+			isLeftDragging = true;
+		}	
+	} else if(event.button == 2){
+		var plane = new THREE.Plane();
+		plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal), ui_musicBox.position);
+
+		var intersection = new THREE.Vector3();
+
+		raycaster.ray.intersectPlane(plane, intersection);
+
+		tsOffset.copy(intersection);
+
+		isRightDragging = true;
+	}
+}
+
+function onDocumentMouseMove(e){
+	event.preventDefault();
+
+	if(isLeftDragging){
+		var deltaMove = {
+			x: e.offsetX - previousMousePosition.x,
+			y: e.offsetY - previousMousePosition.y
+		}; 
+		rotateLib(deltaMove);
+	} else if(isRightDragging) {
+		mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+
+		raycaster.setFromCamera( mouse, camera );
+
+		var plane = new THREE.Plane();
+		plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal), ui_musicBox.position);
+
+		var intersection = new THREE.Vector3();
+
+		raycaster.ray.intersectPlane(plane, intersection);
+
+		tsOffset = intersection.sub(tsOffset);
+		translateMusicBox(tsOffset);
+	} else {
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+		raycaster.setFromCamera( mouse, camera );
+		var objectsArray = [];
+		objectsArray.push(ui_musicBoxBack);
+		objectsArray.push(ui_musicBoxQ);
+		for(var i = 0;i < libElements.length;i++){
+			objectsArray.push(libElements[i]);
+		}
+
+		var intersects = raycaster.intersectObjects( objectsArray );
+
+		if ( intersects.length > 0 ) {
+
+			if ( highlighted != intersects[0].object ) {
+
+				if(highlighted != null) { removeHighlight(highlighted); }
+				highlighted = intersects[0].object;
+				highlightElement(highlighted);
+
+			}
+		} else {
+			if(highlighted != null) { removeHighlight(highlighted); }
+			highlighted = null;
+		}
+	}
+
+	previousMousePosition = {
+		x: e.offsetX,
+		y: e.offsetY
+	};
+}
+
+function onDocumentMouseUp(event){
+	isLeftDragging = false;
+	isRightDragging = false;
+}
+
+function onDocumentClick(event){
+	//event.preventDefault();
+
+	if(event.button == 0 && highlighted != null){
+		if(highlighted.info.type == "queue"){
+			showQueue();
+		} else if(highlighted.info.type == "back"){
+			if(searchQueue.length > 1){
+				searchQueue.pop();
+				fetchLibrary(searchQueue.pop());
+			}
+		} else {
+			var selectedType = highlighted.info.type;
+			var searchQuery = {
+					filterName: null,
+					filterValue: null
+			};
+
+			switch(selectedType){
+				case "artists" : {
+						searchQuery.type = "songs";
+						fetchLibrary(searchQuery);
+						break;
+					}
+				case "albums" : {
+						searchQuery.type = "songs";
+						fetchLibrary(searchQuery);
+						break;
+					}
+				case "songs" : queueSong(highlighted);
+					break;
+			}
+		}
+	}
+}
+//-------------------------------------------------------------------
+
 function animate() {
 	requestAnimationFrame( animate );
 	
@@ -515,16 +601,40 @@ function animate() {
 	render();
 }
 
-function highlightElement(element){
-	highlighted.currentHex = highlighted.material.emissive.getHex();
-	highlighted.material.emissive.setHex(0xff0000);
-}
-
-function removeHighlight(element){
-	highlighted.material.emissive.setHex( highlighted.currentHex );
-}
-
 function render(){
 	renderer.render( scene, camera );
 }
 
+// navigation functions - deltaMove is a vector
+// comment - here we are using Vector2 but it can be Vector3 also
+function rotateLib(deltaMove){
+	var deltaRotationQuaternion = new THREE.Quaternion()
+			.setFromEuler(new THREE.Euler(
+				toRadians(deltaMove.y * 1),
+				toRadians(deltaMove.x * 1),
+				0,
+				'XYZ'
+			));
+
+	libObject.quaternion.multiplyQuaternions(deltaRotationQuaternion, libObject.quaternion);
+}
+
+function translateMusicBox(deltaMove){
+	//console.log(deltaMove);
+	var speed = 0.3;
+	ui_musicBox.position.x += 0.1*deltaMove.x;
+	ui_musicBox.position.y += 0.1*deltaMove.y;
+}
+
+function zoomMusicBox(deltaMove){
+	ui_musicBox.position.z = ui_musicBox.position.z + deltaMove;
+}
+
+// helper functions --------------------------------------
+function toRadians(angle) {
+	return angle * (Math.PI / 180);
+}
+
+function toDegrees(angle) {
+	return angle * (180 / Math.PI);
+}
