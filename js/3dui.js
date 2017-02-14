@@ -16,6 +16,8 @@ var searchQueue = [];
 
 var navController;
 var clock;
+var leapController;
+var gesmoController;
 
 var ui_musicBox;
 var ui_musicPlayer;
@@ -31,8 +33,10 @@ var titleFont, subTitleFont, descFont;
 
 var highlighted;
 
+var posSphere;
+
 init();
-animate();
+//animate();
 
 function init(){
 	// create the scene
@@ -72,6 +76,9 @@ function init(){
 	ui_musicBoxBack.info = {
 		type: "back"
 	};
+
+	posSphere = new THREE.Mesh(new THREE.SphereGeometry(10), new THREE.MeshBasicMaterial(0x0000ff));
+    scene.add(posSphere);
 
 	var ambientLight = new THREE.AmbientLight( 0x555555 );
 	scene.add(ambientLight);
@@ -125,26 +132,42 @@ function init(){
 	renderer.sortObjects = false;
 	document.getElementById( 'container' ).appendChild( renderer.domElement );
 
-	// add event listener
+	leapController = new Leap.Controller({ enableGestures: true })
+		.use('transform', {
+			position: new THREE.Vector3(0, 0, -400),
+			effectiveParent: camera	
+		})
+		.use('riggedHand', {
+			parent: scene,
+			renderer: renderer,
+			camera: camera,
+			renderFn: function(){
+				// for mouse interaction-----
+				var delta = clock.getDelta();
+				navController.update(delta);
+				//---------------------------
+
+				gesmoController.update();
+				
+				TWEEN.update();
+				render();
+			}
+		}).connect();
+
+	gesmoController = new THREE.GesmoControls(ui_musicBox, leapController, false, posSphere);	
+
+	// window event listener
+	window.addEventListener('resize', onWindowResize, false);
+
+	// document event listeners for mouse events
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
 	document.addEventListener('mouseup', onDocumentMouseUp, false);
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 	document.addEventListener('click', onDocumentClick, false);
-	window.addEventListener('resize', onWindowResize, false);
-
-	//var loader = new THREE.PLYLoader();
-	//loader.setPath("http://0.0.0.0:8000/models/");
-	// loader.load('http://0.0.0.0:8000/models/Vinyl_01.ply', function(geom, mat){
-	// 	console.log(geom);
-	// 	console.log(mat);
-	// 	// console.log('here 1');
-	// 	// createMusicBox(geom);
-	// }, function(arg){
-
-	// }, function(arg1, arg2){
-	// 	console.log(arg1);
-	// 	console.log(arg2);
-	// });
+	
+	// leap controller event listeners
+	//leapController.on('frame', onFrame);
+	//leapController.on('gesture', onGesture);
 
 	var fontLoader = new THREE.FontLoader();
 	fontLoader.load("fonts/helvetiker_bold.typeface.json", function(font){
@@ -437,8 +460,6 @@ function showQueue(){
 			libObject.add(itemMesh);
 		}
 
-		//scene.add(libObject);
-
 		assignTargets("queue");
 
 		setTimeout(function(){ 
@@ -510,8 +531,8 @@ function onDocumentMouseMove(e){
 
 		raycaster.ray.intersectPlane(plane, intersection);
 
-		tsOffset = intersection.sub(tsOffset);
-		translateMusicBox(tsOffset);
+		var delta = intersection.sub(tsOffset);
+		tsOffset.copy(intersection);
 	} else {
 		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -589,6 +610,29 @@ function onDocumentClick(event){
 }
 //-------------------------------------------------------------------
 
+//for leap motion interaction----------------------------------------
+
+function onFrame(frame){
+	// console.log("Frame");
+	// console.log(frame);
+}
+
+function onGesture(gesture){
+	switch(gesture.type){
+		case "swipe" : {
+			var swipeDirec = gesture.direction;
+			var deltaMove = {
+				x: swipeDirec[0]*gesture.speed,
+				y: swipeDirec[1]*gesture.speed
+			};
+			rotateLib(deltaMove);
+			break;
+		}
+	}
+}
+
+//-------------------------------------------------------------------
+
 function animate() {
 	requestAnimationFrame( animate );
 	
@@ -620,10 +664,10 @@ function rotateLib(deltaMove){
 }
 
 function translateMusicBox(deltaMove){
-	//console.log(deltaMove);
-	var speed = 0.3;
-	ui_musicBox.position.x += 0.1*deltaMove.x;
-	ui_musicBox.position.y += 0.1*deltaMove.y;
+	// var speed = 0.3;
+	// ui_musicBox.position.x += 0.1*deltaMove.x;
+	// ui_musicBox.position.y += 0.1*deltaMove.y;
+	// ui_musicBox.position.set(deltaMove);
 }
 
 function zoomMusicBox(deltaMove){

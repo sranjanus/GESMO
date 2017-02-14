@@ -16,7 +16,7 @@
       	this.invert = (invert === undefined ? true : invert);
       	this.anchorDelta = 1;
 
-            this.posSphere = posSphere;
+        this.posSphere = posSphere;
 
       	this.translationSpeed = 20;
       	this.translationDecay = 0.3;
