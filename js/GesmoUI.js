@@ -3,8 +3,7 @@
  * Author: @Shashank
  */
 
- GESMO.GesmoUI = (function(){
- 	var GesmoUI = function(container){
+ GESMO.GesmoUI = function(container){
 
  		this.container = container;
 
@@ -18,26 +17,58 @@
 		this.scene.add(this.musicBox);
 
 		this.musicPlayer = new THREE.Mesh( new THREE.BoxGeometry( 5000, 800, 200 ), new THREE.MeshLambertMaterial( {color: 0x00ff00} ) );
-		this.musicBox.add( ui_musicPlayer );
+		this.musicBox.add( this.musicPlayer );
 		this.musicPlayer.position.y = 3100;
 
-		this.musicBoxQ = new THREE.Mesh(new THREE.BoxGeometry( 800, 250, 100), new THREE.MeshLambertMaterial( { color: 0x0000fff}));
+		this.musicBoxQ = new THREE.Mesh(new THREE.BoxGeometry( 800, 250, 100), new THREE.MeshLambertMaterial( { color: 0x0000ff}));
 		this.musicPlayer.add(this.musicBoxQ);
 		this.musicBoxQ.position.z = this.musicPlayer.position.z + 90;
 		this.musicBoxQ.position.y = this.musicPlayer.position.y - 3650;
-		this.musicBoxQ.info = {
+		this.musicBoxQ.userData = {
 			type: "queue"
 		};
 
+		this.musicBoxPlay = new THREE.Mesh(new THREE.BoxGeometry( 800, 250, 100), new THREE.MeshLambertMaterial( { color: 0x0000ff}));
+		this.musicPlayer.add(this.musicBoxPlay);
+		this.musicBoxPlay.position.z = this.musicPlayer.position.z + 90;
+		this.musicBoxPlay.position.x = this.musicPlayer.position.x + 250;
+		this.musicBoxPlay.userData = {
+				type: "play"
+		};
+
+		this.musicBoxPause = new THREE.Mesh(new THREE.BoxGeometry( 800, 250, 100), new THREE.MeshLambertMaterial( { color: 0x00ffff}));
+		//this.musicPlayer.add(this.musicBoxPause);
+		this.musicBoxPause.position.z = this.musicPlayer.position.z + 90;
+		this.musicBoxPause.position.x = 255;
+		this.musicBoxPause.userData = {
+				type: "pause"
+		};
+
+		this.musicBoxPrev = new THREE.Mesh(new THREE.BoxGeometry( 800, 250, 100), new THREE.MeshLambertMaterial( { color: 0xffff00}));
+		//this.musicPlayer.add(this.musicBoxPrev);
+		this.musicBoxPrev.position.z = this.musicPlayer.position.z + 90;
+		this.musicBoxPlay.position.x = 510;
+		this.musicBoxPrev.userData = {
+				type: "prev"
+		};
+
+		this.musicBoxNext = new THREE.Mesh(new THREE.BoxGeometry( 800, 250, 100), new THREE.MeshLambertMaterial( { color: 0xff00ff}));
+		//this.musicPlayer.add(this.musicBoxNext);
+		this.musicBoxNext.position.z = this.musicPlayer.position.z + 90;
+		this.musicBoxNext.position.x = -255;
+		this.musicBoxNext.userData = {
+				type: "next"
+		};
+
 		this.musicBoxBack = new THREE.Mesh( new THREE.BoxGeometry(400, 400, 10), new THREE.MeshLambertMaterial({color: 0x00ff00}));
-		this.musicBox.add( ui_musicBoxBack );
+		//this.musicBox.add( this.musicBoxBack );
 		this.musicBoxBack.position.y = -3200;
-		this.musicBoxBack.info = {
+		this.musicBoxBack.userData = {
 			type: "back"
 		};
 
 		this.musicLibrary = new THREE.Object3D();
-		this.musicBox.add(musicLibrary);
+		this.musicBox.add(this.musicLibrary);
 
 		this.elementMeshPool = [];
 		this.libElements = [];
@@ -46,7 +77,7 @@
 
 		// create and add lights to the scene
 		this.ambientLight = new THREE.AmbientLight( 0x555555 );
-		this.scene.add(ambientLight);
+		this.scene.add(this.ambientLight);
 
 		this.lights = [];
 		this.lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
@@ -58,6 +89,11 @@
 		//lights[ 2 ].position.set( - 100, - 200, - 100 );
 
 		this.scene.add( this.lights[ 0 ] );
+
+		this.trackballControls = new THREE.TrackballControls(this.camera);
+		this.trackballControls.noRotate = true;
+		this.trackballControls.noPan = true;
+		this.clock = new THREE.Clock();
 
 		this.mousePos = new THREE.Vector2();
 		this.clock = new THREE.Clock(); 
@@ -81,88 +117,94 @@
 		var fontLoader = new THREE.FontLoader();
 		fontLoader.load("fonts/helvetiker_bold.typeface.json", function(font){
 			this.titleFont = font;
+			var newEvent = new CustomEvent('gesmo.ui.setupcomplete');
+			window.dispatchEvent(newEvent);
 		}.bind(this));
- 	}
+ 	};
 
- 	GesmoUI.prototype.fetchLibrary = function(searchQuery){
+GESMO.GesmoUI.prototype = {
+
+ 	constructor: GESMO.GesmoUI,
+
+ 	createLibraryElements: function(){
+ 		var itemGeom = new THREE.BoxGeometry(400, 400, 10);
+		var itemMat = new THREE.MeshPhongMaterial({
+			color: Math.random() * 0xffffff,
+			specular : 0x111111,
+			shininess: 30,
+			side: THREE.DoubleSide
+		});
+
+		var itemMesh = new THREE.Mesh(itemGeom, itemMat);
+		itemMesh.userData = {};
+		return itemMesh;
+ 	},
+
+ 	addToMeshPool: function(value){
+ 		for(var i = 0;i < value;i++){
+			this.elementMeshPool.push(this.createLibraryElements());
+		}
+ 	},
+
+ 	fetchLibrary: function(searchQuery){
  		if(this.libElements.length > 0){
  			this.destroyLibrary();
  		}
 
  		var newEvent = new CustomEvent('gesmo.ui.fetchlibrary', {
  			'detail': {
- 				query: searchQuery;
+ 				query: searchQuery
  			}
  		});
 
  		window.dispatchEvent(newEvent);
- 	}
+ 	},
 
- 	GesmoUI.prototype.createLibraryElements = function(){
- 			var itemGeom = new THREE.BoxGeometry(400, 400, 10);
-			var itemMat = new THREE.MeshPhongMaterial({
-				color: Math.random() * 0xffffff,
-				specular : 0x111111,
-				shininess: 30,
-				side: THREE.DoubleSide
-			});
-
-			var itemMesh = new THREE.Mesh(itemGeom, itemMat);
-			itemMesh.info = {};
- 			itemMesh.info.type = "";
-			return itemMesh;
- 	}
-
- 	GesmoUI.prototype.addToMeshPool = function(value){
- 		for(var i = 0;i < value;i++){
-			this.elementMeshPool.push(createLibraryElements);
-		}
- 	}
-
- 	GesmoUI.prototype.destroyLibrary = function(){
- 		while(libElements.length > 0){
- 			var libMesh = libElements.pop();
+ 	destroyLibrary: function(){
+ 		while(this.libElements.length > 0){
+ 			var libMesh = this.libElements.pop();
  			this.musicLibrary.remove(libMesh);
  			var label = libMesh.getObjectByName("label");
  			libMesh.remove(label);
- 			libMesh.info = {};
- 			libMesh.info.type = "";
+ 			libMesh.userData = {};
  			this.elementMeshPool.push(libMesh);
  		}
- 	}
+ 	},
 
- 	GesmoUI.prototype.showLibrary = function(type, data){
+ 	showLibrary: function(type, data){
  		if(data.length > this.elementMeshPool.length){
  			this.addToMeshPool(data.length - this.elementMeshPool.length);
  		}
 
  		for(var i = 0;i < data.length;i++){
  			var itemMesh = this.elementMeshPool.pop();
- 			itemMesh.position.x = ui_musicPlayer.position.x;
-			itemMesh.position.y = ui_musicPlayer.position.y;
-			itemMesh.position.z = ui_musicPlayer.position.z;
+ 			itemMesh.position.x = this.musicPlayer.position.x;
+			itemMesh.position.y = this.musicPlayer.position.y;
+			itemMesh.position.z = this.musicPlayer.position.z;
 
-			itemMesh.info = data;
-			itemMesh.info.type = type;
+			itemMesh.userData = data[i];
+			itemMesh.userData.type = type;
+
+			this.addLabels(itemMesh);
 
 			this.libElements.push(itemMesh);
 			this.musicLibrary.add(itemMesh);
  		}
 
  		this.assignTargets(type);
- 		this.transform(targets, 2000);
- 	}
+ 		this.transform(this.targets, 2000);
+ 	},
 
- 	GesmoUI.prototype.onWindowResize = function(){
+ 	onWindowResize: function(){
  		this.camera.aspect = window.innerWidth/window.innerHeight;
  		this.camera.updateProjectionMatrix();
 
  		this.renderer.setSize(window.innerWidth, window.innerHeight);
- 	}
+ 	},
 
  	// for mouse interaction----------------------------------------------------------------------------------
 
- 	GesmoUI.prototype.onMouseDown = function(event){
+ 	onMouseDown: function(event){
  		this.mousePos.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		this.mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
@@ -193,9 +235,9 @@
 
 			this.isRightDragging = true;
 		}
- 	}
+ 	},
 
- 	GesmoUI.prototype.onMouseMove = function(event){
+ 	onMouseMove: function(event){
  		event.preventDefault();
 
 		if(this.isLeftDragging){
@@ -204,7 +246,7 @@
 				y: event.offsetY - this.previousMousePosition.y
 			}; 
 			this.rotateLib(deltaMove);
-		} else if(isRightDragging) {
+		} else if(this.isRightDragging) {
 			this.mousePos.x = ( e.clientX / window.innerWidth ) * 2 - 1;
 			this.mousePos.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 
@@ -225,10 +267,14 @@
 			this.mousePos.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 			this.mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-			this.raycaster.setFromCamera( mouse, camera );
+			this.raycaster.setFromCamera( this.mousePos, this.camera );
 			var objectsArray = [];
 			objectsArray.push(this.musicBoxBack);
 			objectsArray.push(this.musicBoxQ);
+			objectsArray.push(this.musicBoxPlay);
+			objectsArray.push(this.musicBoxPause);
+			objectsArray.push(this.musicBoxPrev);
+			objectsArray.push(this.musicBoxNext);
 			for(var i = 0;i < this.libElements.length;i++){
 				objectsArray.push(this.libElements[i]);
 			}
@@ -254,16 +300,16 @@
 			x: event.offsetX,
 			y: event.offsetY
 		};
- 	}
+ 	},
 
- 	GesmoUI.prototype.onMouseUp = function(event){
+ 	onMouseUp: function(event){
  		this.isLeftDragging = false;
  		this.isRightDragging = false;
- 	}
+ 	},
 
- 	GesmoUI.prototype.onClick = function(event){
+ 	onClick: function(event){
  		if(event.button == 0 && this.highlighted != null){
-			var selectedType = this.highlighted.info.type;
+			var selectedType = this.highlighted.userData.type;
 			var searchQuery = {
 					filterName: null,
 					filterValue: null
@@ -272,6 +318,8 @@
 			switch(selectedType){
 				case "artists" : {
 					searchQuery.type = "songs";
+					searchQuery.filterName = "artist_id";
+					searchQuery.filterValue = this.highlighted.userData.id;
 					this.fetchLibrary(searchQuery);	
 					break;
 				}
@@ -294,29 +342,51 @@
 					this.queueSong(this.highlighted);
 					break;
 				}
+				case "play" : {
+					var event = new CustomEvent("gesmo.actions.play");
+					window.dispatchEvent(event);
+					break;
+				}
+				case "pause" : {
+					var event = new CustomEvent("gesmo.actions.pause");
+					window.dispatchEvent(event);
+					break;
+				}
+				case "prev" : {
+					var event = new CustomEvent("gesmo.actions.prev");
+					window.dispatchEvent(event);
+					break;
+				}
+				case "next" : {
+					var event = new CustomEvent("gesmo.actions.next");
+					window.dispatchEvent(event);
+					break;
+				}
 			}
 		}
- 	}
+ 	},
 
  	// -------------------------------------------------------------------------------------------------------
 
- 	GesmoUI.prototype.animate = function(){
+ 	animate: function(){
  		//requestAnimationFrame(this.animate);
+ 		var delta = this.clock.getDelta();
+ 		this.trackballControls.update(delta);
  		TWEEN.update();
  		this.render();
- 	}
+ 	},
 
- 	GesmoUI.prototype.render = function(){
+ 	render: function(){
  		this.renderer.render( this.scene, this.camera );
- 	}
+ 	},
 
- 	GesmoUI.prototype.addLabels = function(mesh){
+ 	addLabels: function(mesh){
 		var nameMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-		var nameGeometry = new THREE.TextGeometry(mesh.info.name + " " + mesh.info.id, {
+		var nameGeometry = new THREE.TextGeometry(mesh.userData.name + " " + mesh.userData.id, {
 			size: 40,
 			height: 0,
 			bevelEnabled: false,
-			font: titleFont,
+			font: this.titleFont,
 			weigth: "normal"
 		});
 
@@ -326,9 +396,9 @@
 
 		nameLabel.position.x = nameLabel.position.x - 50;
 		nameLabel.position.z = nameLabel.position.z + 10;
-	}
+	},
 
-	GesmoUI.prototype.assignTargets = function(type){
+	assignTargets: function(type){
 		this.targets.length = 0;
 		var vector = new THREE.Vector3();
 		switch(type){
@@ -406,9 +476,9 @@
 				break;
 			}
 		}
-	}
+	},
 
-	GesmoUI.prototype.transform = function( targets, duration ) {
+	transform: function( targets, duration ) {
 
 		TWEEN.removeAll();
 
@@ -426,7 +496,6 @@
 				.to( { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration )
 				.easing( TWEEN.Easing.Exponential.InOut )
 				.start();
-
 		}
 
 		new TWEEN.Tween( this )
@@ -436,62 +505,73 @@
 
 
 		return this;
-	}
+	},
 
-	GesmoUI.prototype.highlightElement = function(element){
+	highlightElement: function(element){
 		element.currentHex = element.material.emissive.getHex();
 		element.material.emissive.setHex(0xff0000);
-	}
+	},
 
-	GesmoUI.prototype.removeHighlight = function(element){
+	removeHighlight: function(element){
 		element.material.emissive.setHex( element.currentHex );
-	}
+	},
 
-	GesmoUI.prototype.queueSong = function(item){
+	queueSong: function(item){
 		var copy = item.clone();
-		scene.add(copy);
+		copy.position.copy(item.position);
+		copy.rotation.copy(item.rotation);
+		console.log(item.position);
+		console.log(copy.position);
 
-		TWEEN.removeAll();
+		this.musicLibrary.add(copy);
 
 		var tween = new TWEEN.Tween( copy.position )
-				.to( { x: ui_musicPlayer.position.x, y: ui_musicPlayer.position.y, z: ui_musicPlayer.position.z }, Math.random() * 1000 + 1000 )
-				.easing( TWEEN.Easing.Exponential.InOut )
+				.to( { x: this.musicPlayer.position.x, y: this.musicPlayer.position.y, z: this.musicPlayer.position.z }, Math.random() * 500 + 500 )
+				.easing( TWEEN.Easing.Quadratic.InOut )
 				.onComplete(function(){
-					this.scene.remove(copy);
+					this.musicLibrary.remove(copy);
 					// send a call to queue with copy.info.id as argument
+					var newEvent = new CustomEvent('gesmo.ui.addtoqueue', {
+						detail: {
+							type: copy.userData.type,
+							id: copy.userData.id
+						}
+					});
+
+					window.dispatchEvent(newEvent);
 				}.bind(this))
 				.start();
-	}
+	},
 
-	GesmoUI.prototype.rotateLib = function(deltaMove){
+	rotateLib: function(deltaMove){
 		var deltaRotationQuaternion = new THREE.Quaternion()
 				.setFromEuler(new THREE.Euler(
-					toRadians(deltaMove.y * 1),
-					toRadians(deltaMove.x * 1),
+					this.toRadians(deltaMove.y * 1),
+					this.toRadians(deltaMove.x * 1),
 					0,
 					'XYZ'
 				));
 
 		this.musicLibrary.quaternion.multiplyQuaternions(deltaRotationQuaternion, this.musicLibrary.quaternion);
-	}
+	},
 
-	GesmoUI.prototype.translateMusicBox = function(deltaMove){
+	translateMusicBox: function(deltaMove){
 		// var speed = 0.3;
-		// ui_musicBox.position.x += 0.1*deltaMove.x;
-		// ui_musicBox.position.y += 0.1*deltaMove.y;
-		// ui_musicBox.position.set(deltaMove);
-	}
+		// this.musicBox.position.x += 0.1*deltaMove.x;
+		// this.musicBox.position.y += 0.1*deltaMove.y;
+		// this.musicBox.position.set(deltaMove);
+	},
 
-	GesmoUI.prototype.zoomMusicBox = function(deltaMove){
+	zoomMusicBox: function(deltaMove){
 		this.musicBox.position.z = this.musicBox.position.z + deltaMove;
-	}
+	},
 
 	// helper functions --------------------------------------
-	function toRadians(angle) {
+	toRadians: function(angle) {
 		return angle * (Math.PI / 180);
-	}
+	},
 
-	function toDegrees(angle) {
+	toDegrees: function(angle) {
 		return angle * (180 / Math.PI);
 	}
- }());
+};
