@@ -1,5 +1,5 @@
 var windowMode =  GESMO.MaxMode;
-var ui, leapController, dataController, player;
+var ui, leapController, dataController, player, leapController, gestureController;
 
 var queue = [];
 var loadedData = [];
@@ -9,6 +9,23 @@ window.onload = function(){
 	ui = new GESMO.GesmoUI(document.getElementById('container'));
 	dataController = new GESMO.DataController();
 	player = new GESMO.GesmoPlayer([]);
+	leapController = new Leap.Controller({ enableGestures: true })
+		.use('transform', {
+			position: new THREE.Vector3(0, 0, -1000),
+			effectiveParent: ui.camera
+		})
+		.use('riggedHand', {
+			parent: ui.scene,
+			renderer: ui.renderer,
+			camera: ui.camera,
+			renderFn: function(){
+				gestureController.update();
+				ui.animate();
+			}
+		}).connect();
+
+
+	gestureController = new GESMO.GestureController(leapController, ui.musicBox, ui.musicLibrary, ui.fetchAllPickables());
 
 	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
 		switch(event.detail.query.type){

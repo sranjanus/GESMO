@@ -88,7 +88,7 @@
 		//lights[ 1 ].position.set( 100, 200, 100 );
 		//lights[ 2 ].position.set( - 100, - 200, - 100 );
 
-		this.scene.add( this.lights[ 0 ] );
+		this.musicLibrary.add( this.lights[ 0 ] );
 
 		this.trackballControls = new THREE.TrackballControls(this.camera);
 		this.trackballControls.noRotate = true;
@@ -573,5 +573,20 @@ GESMO.GesmoUI.prototype = {
 
 	toDegrees: function(angle) {
 		return angle * (180 / Math.PI);
+	},
+
+	fetchAllPickables: function(){
+		var objectsArray = [];
+		objectsArray.push(this.musicBoxBack);
+		objectsArray.push(this.musicBoxQ);
+		objectsArray.push(this.musicBoxPlay);
+		objectsArray.push(this.musicBoxPause);
+		objectsArray.push(this.musicBoxPrev);
+		objectsArray.push(this.musicBoxNext);
+		for(var i = 0;i < this.libElements.length;i++){
+			objectsArray.push(this.libElements[i]);
+		}
+
+		return objectsArray;
 	}
 };
