@@ -9,40 +9,45 @@ window.onload = function(){
 	ui = new GESMO.GesmoUI(document.getElementById('container'));
 	dataController = new GESMO.DataController();
 	player = new GESMO.GesmoPlayer([]);
-	leapController = new Leap.Controller({ enableGestures: true })
-		.use('transform', {
-			position: new THREE.Vector3(0, 0, -1000),
-			effectiveParent: ui.camera
-		})
-		.use('riggedHand', {
-			parent: ui.scene,
-			renderer: ui.renderer,
-			camera: ui.camera,
-			renderFn: function(){
-				gestureController.update();
-				ui.animate();
-			}
-		}).connect();
+	// leapController = new Leap.Controller({ enableGestures: true })
+	// 	.use('transform', {
+	// 		position: new THREE.Vector3(0, -200, -400),
+	// 		effectiveParent: ui.camera
+	// 	})
+	// 	.use('riggedHand', {
+	// 		parent: ui.scene,
+	// 		renderer: ui.renderer,
+	// 		camera: ui.camera,
+	// 		materialOptions: {
+	// 	      wireframe: true,
+	// 	      color: new THREE.Color(0xcccccc)
+	// 	    },
+	// 		renderFn: function(){
+	// 			gestureController.update();
+	// 			ui.animate();
+	// 		}
+	// 	}).connect();
 
 
-	gestureController = new GESMO.GestureController(leapController, ui.musicBox, ui.musicLibrary, ui.fetchAllPickables());
+	//gestureController = new GESMO.GestureController(leapController, ui);
 
 	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
 		switch(event.detail.query.type){
 			case "queue" : {
 					sendQueueToUI();
+					searchQueries.push(event.detail.query);
 				break;
 			}
 
 			case "back" : {
 					searchQueries.pop();
-					dataController.fetchData(searchQueries.pop(), dataFetched, dataFetchFailed);
+					dataController.fetchData(searchQueries[searchQueries.length - 1], dataFetched, dataFetchFailed);
 				break;
 			}
 
 			default: {
-				searchQueries.push(event.detail.query);
 				dataController.fetchData(event.detail.query, dataFetched, dataFetchFailed);
+				searchQueries.push(event.detail.query);
 			}
 		}
 		
@@ -98,6 +103,10 @@ window.onload = function(){
 		player.skip("next");
 	}.bind(this));
 
+	window.addEventListener('gesmo.player.newsong', function(event){
+		ui.onSongChange(event.detail.index);
+	});
+
 	loop();
 };
 
@@ -124,7 +133,6 @@ function dataFetchFailed(error){
 }
 
 function addToQueue(type, id){
-	console.log(type);
 	if(type == "songs"){
 		var songObj = findObjectByKey(loadedData, "id", id);
 		if(songObj != null) { this.player.playlist.push(songObj); 
@@ -146,7 +154,6 @@ function findObjectByKey(arr, key, value){
 }
 
 function sendQueueToUI(){
-	console.log(queue);
 	var dataList = [];
 	this.player.playlist.forEach(function(qItem){
 		dataList.push({
@@ -154,6 +161,5 @@ function sendQueueToUI(){
 			id: qItem.id
 		});
 	}.bind(this));
-	console.log(dataList);
 	ui.showLibrary("queue", dataList);
 }

@@ -65,7 +65,6 @@ GESMO.GesmoPlayer.prototype = {
 		}
 
 		sound.play();
-		console.log("playing " + data.path);
 
 		// for UI
 		//this.elementList.track.innerHTML = (index + 1) + '. ' + data.title;
@@ -82,6 +81,12 @@ GESMO.GesmoPlayer.prototype = {
 		}
 
 		self.index = index;
+		var event = new CustomEvent('gesmo.player.newsong', {
+			detail: {
+				index: self.index
+			}
+		});
+		window.dispatchEvent(event);
 	},
 
 	pause: function(){

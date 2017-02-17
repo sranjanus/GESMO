@@ -3,31 +3,30 @@
  * Author: @Siddhesh, @Shashank
  */
 
- GESMO.GestureController = function(controller, objectToTranslate, objectToRotate, objectsToPick){
+ GESMO.GestureController = function(controller, ui){
  	this.controller = controller;
  	this.anchorDelta = 1;
 
- 	this.objectToTranslate = objectToTranslate;
- 	this.objectToRotate = objectToRotate;
- 	this.objectsToPick = objectsToPick;
+ 	this.ui = ui;
 
  	this.mode = GESMO.NOMODE;
 
- 	this.translationSpeed = 20;
+ 	this.translationSpeed = 5;
  	this.translationDecay = 0.3;
  	this.transSmoothing = 0.5;
  	this.rotationSmoothing = 0.5;
 
  	this.rotationSlerp = 0.8;
- 	this.rotationSpeed = 4;
+ 	this.rotationSpeed = 5;
 
- 	this.pinchThreshold = 0.5;
+ 	this.grabThreshold = 1;
+ 	this.pinchThreshold = 0.85;
 
  	this.vector = new THREE.Vector3();
  	this.vector2 = new THREE.Vector3();
  	this.matrix = new THREE.Quaternion();
  	this.translationMomentum = new THREE.Vector3();
- 	this.rotationMomentum = this.objectToRotate.quaternion.clone();
+ 	this.rotationMomentum = ui.musicLibrary.quaternion.clone();
 
  	this.transLP = [
  		new LowPassFilter(this.transSmoothing),
@@ -68,25 +67,34 @@
 
  		if(hands.length == 1){
  			if(hands[0].type == "right" && anchorHands[0].type == "right"){
+ 				
+ 				var tipPos = new THREE.Vector3();
+ 				handMesh =hands[0].data('riggedHand.mesh')
+    			handMesh.scenePosition(hands[0].indexFinger.tipPosition, tipPos);
+    			
+    			ui.onHandMove(tipPos);
+
  				if(this.shouldTranslate(anchorHands[0], hands[0])){
  					this.applyTranslation(anchorHands[0], hands[0]);
  				}
 
- 				// if(this.shouldTouch(anchorHands[0], hands[0])){
+ 				if(this.shouldRotate(anchorHands[0], hands[0])){
+ 					this.applyRotation(anchorHands[0], hands[0]);
+	 			}
 
- 				// }
- 			} else {
- 				
+	 			if(this.shouldPick(anchorHands[0], hands[0])){
+	 				var eventObj = {
+	 					button: 0
+	 				};
+	 				ui.onClick(eventObj);
+	 			}
+
  			}
- 		} else if(hands.length == 2){
- 			if(this.shouldRotate(anchorHands, hands)){
- 				this.applyRotation(anchorHands, hands);
-	 		}
  		}
  	},
 
  	shouldTranslate: function(anchorHand, hand){
- 		return this.isEngaged(anchorHand) && this.isEngaged(hand);
+ 		return (ui.viewMode != GESMO.ARTISTSVIEW) && this.isEngaged(anchorHand) && this.isEngaged(hand);
  	},
 
  	applyTranslation: function(anchorHand, hand){
@@ -95,12 +103,16 @@
  		if(translation[1] > 0) translation[1] = this.transLP[1].sample(translation[1]);
  		if(translation[2] > 0) translation[2] = this.transLP[2].sample(translation[2]);
 
+ 		if(ui.viewMode == GESMO.SONGSVIEW){
+ 			translation[1] = 0;
+ 		}
+
  		this.vector.fromArray(translation);
  		this.vector.multiplyScalar(this.translationSpeed);
- 		this.vector.applyQuaternion(this.objectToTranslate.quaternion);
+ 		this.vector.applyQuaternion(ui.musicLibrary.quaternion);
  		this.translationMomentum.add(this.vector);
 
- 		this.objectToTranslate.position.add(this.translationMomentum);
+ 		this.ui.musicLibrary.position.add(this.translationMomentum);
  		this.translationMomentum.multiplyScalar(this.translationDecay);
  	},
 
@@ -137,25 +149,30 @@
  		}
  	},
 
- 	shouldRotate: function(anchorHands, hands){
- 		var leftAnchorHand = this.findHand(anchorHands, "left");
- 		var rightAnchorHand = this.findHand(anchorHands, "right");
- 		var leftHand = this.findHand(hands, "left");
- 		var rightHand = this.findHand(hands, "right");
-
- 		return (leftAnchorHand != null) && (rightAnchorHand != null) 
- 					&& (leftHand != null) && (rightHand != null)
- 						&& this.isEngaged(leftAnchorHand) && this.isEngaged(leftHand);
+ 	shouldRotate: function(anchorHand, hand){
+ 		return (ui.viewMode == GESMO.ARTISTSVIEW) && this.isEngaged(anchorHand) && this.isEngaged(hand);
  	},
 
- 	applyRotation: function(anchorHands, hands){
- 		console.log('here');
- 		console.log(anchorHands);
- 		console.log(hands);
+ 	applyRotation: function(anchorHand, hand){
+ 		var translation = this.getTranslation(anchorHand, hand);
+ 		if(translation[0] > 0) translation[0] = this.transLP[0].sample(translation[0]);
+ 		translation[1] = 0;
+ 		translation[2] = 0;
+
+ 		var angle = this.rotationSpeed*translation[0]/450;
+ 		ui.musicLibrary.rotateOnAxis(GESMO.Y_AXIS, angle);
+ 	},
+
+ 	shouldPick: function(anchorHand, hand){
+ 		return (this.isPinched(anchorHand)) && (!this.isPinched(hand));
  	},
 
  	isEngaged: function(h){
- 		return h && (h.pinchStrength > this.pinchThreshold);
+ 		return h && (h.grabStrength == this.grabThreshold);
+ 	},
+
+ 	isPinched: function(h){
+ 		return h && (h.pinchStrength > this.pinchThreshold) && (h.grabStrength < this.grabThreshold);
  	},
 
  	findHand: function(hands, type){

@@ -1,5 +1,5 @@
 GESMO.DataController = function(){
-	this.urlPath = "http://localhost:8000/testData/";
+	this.urlPath = "http://0.0.0.0:8000/testData/";
 };
 
 GESMO.DataController.prototype = {
@@ -21,11 +21,16 @@ GESMO.DataController.prototype = {
 		}
 
 		$.ajax({url: completePath, async: false, success: function(result, status, xhr){
-			console.log(result);
-			console.log(status);
-			console.log(xhr);
 			if(searchQuery.filterName == null){
-			    onSuccess(searchQuery.type, result[searchQuery.type]);
+				var list = result[searchQuery.type];
+				list.sort(function(a, b){
+					var aname = a.name.toUpperCase();
+					var bname = b.name.toUpperCase();
+					if(aname < bname) return -1;
+				    if(aname > bname) return 1;
+				    return 0;
+				});
+			    onSuccess(searchQuery.type, list);
 			} else{
 				var filteredList = [];
 				result[searchQuery.type].forEach(function(item){
@@ -33,7 +38,15 @@ GESMO.DataController.prototype = {
 						filteredList.push(item);
 					}
 				}.bind(this));
-				console.log(filteredList);
+
+				filteredList.sort(function(a, b){
+					var aname = a.name.toUpperCase();
+					var bname = b.name.toUpperCase();
+					if(aname < bname) return -1;
+				    if(aname > bname) return 1;
+				    return 0;
+				});
+
 				onSuccess(searchQuery.type, filteredList);
 			}
 		}, error: function(xhr, status, error){
