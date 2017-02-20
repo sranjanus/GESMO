@@ -94,7 +94,7 @@
  	},
 
  	shouldTranslate: function(anchorHand, hand){
- 		return (ui.viewMode != GESMO.ARTISTSVIEW) && this.isEngaged(anchorHand) && this.isEngaged(hand);
+ 		return (ui.viewMode == GESMO.SONGSVIEW) && (ui.songviewMode == GESMO.SONGSBROWSEVIEW) && this.isEngaged(anchorHand) && this.isEngaged(hand);
  	},
 
  	applyTranslation: function(anchorHand, hand){
@@ -104,7 +104,12 @@
  		if(translation[2] > 0) translation[2] = this.transLP[2].sample(translation[2]);
 
  		if(ui.viewMode == GESMO.SONGSVIEW){
- 			translation[1] = 0;
+ 			if(ui.songviewMode == GESMO.SONGSBROWSEVIEW){
+ 				translation[1] = 0;
+ 				translation[2] = 0;
+ 			} else {
+ 				translation[0] = 0;
+ 			}
  		}
 
  		this.vector.fromArray(translation);

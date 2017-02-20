@@ -1,5 +1,5 @@
 GESMO.DataController = function(){
-	this.urlPath = "http://0.0.0.0:8000/testData/";
+	this.urlPath = "http://localhost:8000/testData/";
 };
 
 GESMO.DataController.prototype = {

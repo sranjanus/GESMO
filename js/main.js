@@ -45,6 +45,11 @@ window.onload = function(){
 				break;
 			}
 
+			case "home" : {
+					searchQueries.pop();
+					ui.createHome();
+			}
+
 			default: {
 				dataController.fetchData(event.detail.query, dataFetched, dataFetchFailed);
 				searchQueries.push(event.detail.query);
@@ -58,13 +63,14 @@ window.onload = function(){
 	}.bind(this));
 
 	window.addEventListener('gesmo.ui.setupcomplete', function(){
+		console.log('here');	
 		var query = {
-			type: "artists",
+			type: "home",
 			filterName: null,
 			filterValue: null
 		};
 		searchQueries.push(query);
-		dataController.fetchData(query, dataFetched, dataFetchFailed);
+		ui.createHome();
 	}.bind(this));
 
 	window.addEventListener('resize', function(event){
