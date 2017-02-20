@@ -9,6 +9,7 @@
 
  	// Create the scene and add fog effect
  	this.scene = new THREE.Scene();
+ 	this.cssScene = new THREE.Scene();
  	//this.scene.fog = new THREE.Fog(0xf7d9aa, 10000, 95000);
 
  	// Create the camera
@@ -21,7 +22,7 @@
  	this.camera.position.x = 3;
  	this.camera.position.z = 0; //10000;
  	this.camera.position.y = 0; //3000
- 	//this.camera.lookAt(new THREE.Vector3(0,0,0));
+ 	this.camera.lookAt(new THREE.Vector3(0,0,0));
 
  	// Create the renderer
  	this.renderer = new THREE.WebGLRenderer( { alpha: 1, antialias: true, clearColor: 0x000000 });
@@ -30,6 +31,28 @@
 	this.renderer.sortObjects = false;
 	this.renderer.shadowMap.enabled = true;
 	this.container.appendChild( this.renderer.domElement );
+	this.renderer.domElement.style.zIndex = 0;
+
+	var playerContainer = document.getElementById('playerContainer');
+	this.cssRenderer = new THREE.CSS3DRenderer();
+	this.cssRenderer.setSize(playerContainer.innerWidth, playerContainer.innerHeight);
+	this.cssRenderer.domElement.style.position = 'absolute';
+	this.cssRenderer.domElement.style.top = 0;
+	this.renderer.domElement.appendChild(this.cssRenderer.domElement);
+
+	var hmdGeom = new THREE.BoxGeometry(1,1,8, 1, 1, 1);
+ 	var hmdMat = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.8, shading:THREE.FlatShading});
+ 	this.hmd = new THREE.Mesh(hmdGeom, hmdMat);
+ 	this.hmd.position.set(21, 29.5, 0);
+ 	this.hmd.castShadow = true;
+ 	this.hmd.receiveShadow = true;
+ 	this.hmd.scale.x = 0.1;
+ 	this.scene.add(this.hmd);
+
+	this.cssPlayer = new THREE.CSS3DObject(playerContainer);
+	//this.cssPlayer.position.set(21, 29.5, 0);
+	this.cssScene.add(this.cssPlayer);
+	//cssObject.position.x = 
 
 	this.movableObjects = new THREE.Object3D();
 	this.scene.add(this.movableObjects);
@@ -62,17 +85,6 @@
  	this.grass.mesh.position.y = 4500;
  	this.island.mesh.add(this.grass.mesh);
 
- 	this.airplane = new GESMO.Airplane();
- 	//this.airplane.mesh.scale.set(0.25, 0.25, 0.25);
- 	this.scene.add(this.airplane.mesh);
-
- 	this.pilot = new GESMO.Pilot();
- 	this.pilot.mesh.position.set(8, 27, 0);
- 	this.airplane.mesh.add(this.pilot.mesh);
-
- 	this.pilot.camPoint.add(this.camera);
- 	this.camera.lookAt(this.airplane.propeller.position);
-
  	this.spaceDebris = new GESMO.SpaceDebris(this.movableObjects);
 
 	//create the music box and it's elements
@@ -87,6 +99,7 @@
 	this.viewMode = GESMO.ARTISTSVIEW;
 	this.songviewMode = GESMO.SONGSSEARCHVIEW;
 	this.curSongIndex = 0;
+	this.curQueueIndex = 0;
 	var slotGeom = new THREE.BoxGeometry(2.5, 1, 1);
 	var slotOMat = new THREE.MeshPhongMaterial({
  		color: 0x000000,
@@ -98,6 +111,7 @@
  	this.slotO.scale.y = 0.05;
  	this.slotO.scale.z = 0.12;
  	this.scene.add(this.slotO);
+ 	this.queuePool = [];
 
 	// this.trackballControls = new THREE.TrackballControls(this.camera);
 	// this.trackballControls.noRotate = true;
@@ -128,21 +142,31 @@
 	    ];
 
 	this.mainList = [
-		'artistsList',
-		'topCharts',
-		'newReleases',
-		'musicLibrary',
-		'stations'
+		{type: 'artistsList', name: "Artists" },
+		{type: 'topCharts', name: "Top Charts"},
+		{type: 'newReleases', name: "New Relases"},
+		{type: 'musicLibrary', name: "My Music" },
+		{type: 'stations', name: "Stations"}
 	];
 
-	//this.createHome();
-
 	var fontLoader = new THREE.FontLoader();
-		fontLoader.load("fonts/helvetiker_bold.typeface.json", function(font){
+	fontLoader.load("fonts/helvetiker_bold.typeface.json", function(font){
 		this.titleFont = font;
+		this.airplane = new GESMO.Airplane(this.titleFont);
+ 		//this.airplane.mesh.scale.set(0.25, 0.25, 0.25);
+ 		this.scene.add(this.airplane.mesh);
+
+ 		this.pilot = new GESMO.Pilot();
+ 		this.pilot.mesh.position.set(8, 27, 0);
+ 		this.airplane.mesh.add(this.pilot.mesh);
+
+ 		this.pilot.camPoint.add(this.camera);
+ 		this.camera.lookAt(this.airplane.propeller.position);
+
 		var newEvent = new CustomEvent('gesmo.ui.setupcomplete');
 		window.dispatchEvent(newEvent);
 	}.bind(this));
+	
  };
 
 GESMO.GesmoUI.prototype = {
@@ -174,7 +198,8 @@ GESMO.GesmoUI.prototype = {
  			box.lookAt(new THREE.Vector3(0, 0, 0));
  			box.castShadow = true;
  			box.receiveShadow = true;
- 			box.userData.type = this.mainList[i];
+ 			box.userData = this.mainList[i];
+ 			this.addLabels(box, 5);
  			this.libElements.push(box);
  			this.musicLibrary.add(box);
  		}
@@ -245,45 +270,53 @@ GESMO.GesmoUI.prototype = {
  	showLibrary: function(type, data){
  		if(type == "artists"){
  			this.viewMode = GESMO.ARTISTSVIEW;
- 		} else if(type == "songs"){
+ 		}
+
+ 		if(type == "songs"){
  			this.viewMode = GESMO.SONGSVIEW;
- 		} else {
+ 		} 
+
+ 		if(type == "queue"){
  			this.viewMode = GESMO.QUEUEVIEW;
  		}
 
- 		var k = 0;
- 		var sIndex = Math.floor(Math.random()*(this.spaceDebris.clouds.length - 1) + 1);
- 		while(this.spaceDebris.clouds.length - sIndex <= data.length){
- 			sIndex = Math.floor(Math.random()*(this.spaceDebris.clouds.length - 1) + 1);
- 		}
+	 	var k = 0;
+	 	var sIndex = Math.floor(Math.random()*(this.spaceDebris.clouds.length - 1) + 1);
+	 	while(this.spaceDebris.clouds.length - sIndex <= data.length){
+	 		sIndex = Math.floor(Math.random()*(this.spaceDebris.clouds.length - 1) + 1);
+	 	}
 
- 		//this.scene.updateMatrixWorld();
- 		for(var i = 0;i < data.length;i++){
- 			var itemMesh = this.spaceDebris.clouds[sIndex + i];
- 			itemMesh.userData = data[i];
- 			itemMesh.userData.type = type;
- 			itemMesh.userData.position = itemMesh.position.clone();
- 			itemMesh.userData.rotation = itemMesh.rotation.clone();
- 			itemMesh.userData.scale = itemMesh.scale.clone();
+	 	//this.scene.updateMatrixWorld();
+	 	for(var i = 0;i < data.length;i++){
+	 		var itemMesh = this.spaceDebris.clouds[sIndex + i];
+	 		itemMesh.userData = data[i];
+	 		itemMesh.userData.type = type;
+	 		itemMesh.userData.position = itemMesh.position.clone();
+	 		itemMesh.userData.rotation = itemMesh.rotation.clone();
+	 		itemMesh.userData.scale = itemMesh.scale.clone();
 
-			//this.addLabels(itemMesh);
+			this.addLabels(itemMesh, 4);
+
+			if(type == "queue"){
+	 			itemMesh.position.set(this.slotO.position.x, this.slotO.position.y, this.slotO.position.z);
+	 		}
 
 			this.libElements.push(itemMesh);
 			this.musicLibrary.add(itemMesh);
- 		}
-
+	 	}
  		this.assignTargets(type);
  		this.transform(this.targets, 2000);
- 	},
+ 	},	
 
- 	addLabels: function(mesh){
+ 	addLabels: function(mesh, size){
+ 		var names = mesh.userData.name.split(" ");
  		var mbox = new THREE.Box3().setFromObject(mesh);
 		var bSize = mbox.getSize().x;
 
 		var nameMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
-		var names = mesh.userData.name.split(" ");
+		
 		var fnameGeometry = new THREE.TextGeometry(names[0], {
-			size: 7,
+			size: size,
 			height: 0,
 			bevelEnabled: false,
 			font: this.titleFont,
@@ -293,20 +326,19 @@ GESMO.GesmoUI.prototype = {
 		var fnameLabel = new THREE.Mesh(fnameGeometry, nameMaterial);
 		fnameLabel.name = "flabel";
 		mesh.add(fnameLabel);
-		//console.log(mesh.lookAt());
 
 		var fbox = new THREE.Box3().setFromObject(fnameLabel);
 		var fSize = fbox.getSize().x;
 
-		var halfDiff = (bSize - fSize);
+		var halfDiff = (bSize - fSize)/2;
 
-		fnameLabel.position.x = -halfDiff/2;
-		fnameLabel.position.z = 5;
-		fnameLabel.position.y = 5;
+		fnameLabel.translateZ(8);
+		fnameLabel.translateY(5)
+		fnameLabel.translateX(-fSize/2-halfDiff);
 
 		if(names.length == 2){
 			var lnameGeometry = new THREE.TextGeometry(names[1], {
-				size: 7,
+				size: size,
 				height: 0,
 				bevelEnabled: false,
 				font: this.titleFont,
@@ -320,11 +352,11 @@ GESMO.GesmoUI.prototype = {
 			var lbox = new THREE.Box3().setFromObject(lnameLabel);
 			var lSize = lbox.getSize().x;
 
-			halfDiff = (bSize - lSize);
+			halfDiff = (bSize - lSize)/2;
 
-			lnameLabel.position.x = -halfDiff/2;
-			lnameLabel.position.z = 5;
-			lnameLabel.position.y = -5;
+			lnameLabel.translateZ(10);
+			lnameLabel.translateY(-5);
+			lnameLabel.translateX(-lSize/2-halfDiff);
 		}
 	},
 
@@ -438,8 +470,8 @@ GESMO.GesmoUI.prototype = {
 					var itemMat = new THREE.MeshNormalMaterial();
 					var itemMesh = new THREE.Mesh(itemGeom, itemMat);
 
-					itemMesh.position.z = -50*i*i - 250;
-					itemMesh.position.x = i*100;
+					itemMesh.position.x = 50*i*i + 250;
+					itemMesh.position.z = 2*i*50;
 
 					vector.copy( itemMesh.position );
 					vector.x *= -2;
@@ -468,7 +500,7 @@ GESMO.GesmoUI.prototype = {
 			new TWEEN.Tween( object.scale )
 				.to({x: 1, y: 1, z: 1}, Math.random() * duration + duration)
 				.onComplete(function(){
-					this.addLabels(object);
+					//this.addLabels(object);
 				}.bind(this))
 				.start();
 
@@ -547,7 +579,7 @@ GESMO.GesmoUI.prototype = {
 				this.rotateLibY(deltaMove.x);
 			}
 
-			if(this.viewMode == GESMO.HOMEVIEW && Math.abs(deltaMove.x) < Math.abs(deltaMove.y)){
+			if((this.viewMode == GESMO.HOMEVIEW || this.viewMode == GESMO.ARTISTSVIEW) && Math.abs(deltaMove.x) < Math.abs(deltaMove.y)){
 				deltaMove.x = 0;
 				this.translateLibX(deltaMove.y);
 			}
@@ -583,10 +615,7 @@ GESMO.GesmoUI.prototype = {
 			this.mousePos.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
 			this.raycaster.setFromCamera( this.mousePos, this.camera );
-			var objectsArray = [];
-			for(var i = 0;i < this.libElements.length;i++){
-				objectsArray.push(this.libElements[i]);
-			}
+			var objectsArray = this.fetchAllPickables();
 
 			var intersects = this.raycaster.intersectObjects( objectsArray );
 
@@ -670,6 +699,11 @@ GESMO.GesmoUI.prototype = {
 					this.fetchLibrary(searchQuery);
 					break;
 				}
+				case "home" : {
+					searchQuery.type = "home";
+					this.fetchLibrary(searchQuery);
+					break;
+				}
 				case "songs" : {
 					this.queueSong(this.highlighted);
 					break;
@@ -727,6 +761,7 @@ GESMO.GesmoUI.prototype = {
  	},
 
  	render: function(){
+ 		this.cssRenderer.render( this.cssScene, this.camera);
  		this.renderer.render( this.scene, this.camera );
  	},
 
@@ -760,6 +795,7 @@ GESMO.GesmoUI.prototype = {
 				.easing( TWEEN.Easing.Quadratic.InOut )
 				.onComplete(function(){
 						this.musicLibrary.remove(copy);
+						this.queuePool.push(copy);
 						// send a call to queue with copy.info.id as argument
 						var newEvent = new CustomEvent('gesmo.ui.addtoqueue', {
 							detail: {
@@ -771,23 +807,6 @@ GESMO.GesmoUI.prototype = {
 						window.dispatchEvent(newEvent);
 					}.bind(this))
 				.start();
-
-		// var tween2 = new TWEEN.Tween(copy.position)
-		// 			.to( { x: this.slotO.position.x, y: this.slotO.position.y - 1, z: this.slotO.position.z }, Math.random() * 500 + 500 ) 
-		// 			.easing( TWEEN.Easing.Quadratic.InOut )
-		// 			.onComplete(function(){
-		// 				// this.musicLibrary.remove(copy);
-		// 				// // send a call to queue with copy.info.id as argument
-		// 				// var newEvent = new CustomEvent('gesmo.ui.addtoqueue', {
-		// 				// 	detail: {
-		// 				// 		type: copy.userData.type,
-		// 				// 		id: copy.userData.id
-		// 				// 	}
-		// 				// });
-
-		// 				// window.dispatchEvent(newEvent);
-		// 			}.bind(this));
-		// tween1.chain(tween2);
 	},
 
 	rotateLib: function(deltaMove){
@@ -860,13 +879,7 @@ GESMO.GesmoUI.prototype = {
 	},
 
 	fetchAllPickables: function(){
-		var objectsArray = [];
-		objectsArray.push(this.musicBoxBack);
-		objectsArray.push(this.musicBoxQ);
-		objectsArray.push(this.musicBoxPlay);
-		objectsArray.push(this.musicBoxPause);
-		objectsArray.push(this.musicBoxPrev);
-		objectsArray.push(this.musicBoxNext);
+		var objectsArray = this.airplane.buttons.slice();
 		for(var i = 0;i < this.libElements.length;i++){
 			objectsArray.push(this.libElements[i]);
 		}

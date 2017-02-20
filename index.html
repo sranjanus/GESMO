@@ -11,6 +11,7 @@
 		<script type="text/javascript" src="js/PLYLoader.js"></script>
 		<script type="text/javascript" src="js/TrackballControls.js"></script>
 		<script type="text/javascript" src="js/tween.min.js"></script>
+		<script type="text/javascript" src="js/CSS3DRenderer.js"></script>
 		<!--<script type="text/javascript" src="js/SceneUtils.js"></script> -->
 
 		<!-- for AJAX requests -->
@@ -27,9 +28,43 @@
 		<style type="text/css">
 			body { font: 12pt monospace; margin: 0; overflow: hidden; background: linear-gradient(#e4e0ba, #f7d9aa);}
 		</style>
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
 	</head>
 	<body>
 		<div id="container"></div>
+		<div id="playerContainer">
+			<div id="title">
+			    <span id="track"></span>
+			    <div id="timer">0:00</div>
+			    <div id="duration">0:00</div>
+		  	</div>
+
+		  <!-- Controls -->
+		  <div class="controlsOuter">
+		    <div class="controlsInner">
+		      <div id="loading"></div>
+		      <div class="btn" id="playBtn"></div>
+		      <div class="btn" id="pauseBtn"></div>
+		      <div class="btn" id="nextBtn"></div>
+		      <div class="btn" id="prevBtn"></div>
+		      <div class="btn" id="stopBtn"></div>
+		    </div>
+		    <div class="btn" id="playlistBtn"></div>
+		    <div class="btn" id="volumeBtn"></div>
+		  </div>
+
+		  <!-- Progress -->
+		  <div id="waveform"></div>
+		  <div id="bar"></div>
+		  <div id="progress"></div>
+
+		  <!-- Volume -->
+		  <div id="volume" class="fadeout">
+		    <div id="barFull" class="bar"></div>
+		    <div id="barEmpty" class="bar"></div>
+		    <div id="sliderBtn"></div>
+		  </div>
+		</div>
 		<script type="text/javascript" src="js/gesmo.js"></script>
 		<script type="text/javascript" src="js/DataController.js"></script>
 		<script type="text/javascript" src="js/GesmoUI.js"></script>

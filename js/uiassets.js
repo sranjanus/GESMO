@@ -183,17 +183,7 @@ GESMO.Pilot =function(){
  	earR.position.set(0, 0, 6);
  	this.mesh.add(earL);
  	this.mesh.add(earR);
-
- 	var hmdGeom = new THREE.BoxGeometry(1,2,10, 1, 1, 1);
- 	var hmdMat = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.8, shading:THREE.FlatShading});
- 	this.hmd = new THREE.Mesh(hmdGeom, hmdMat);
- 	this.hmd.position.set(15, 4, 0);
- 	this.hmd.castShadow = true;
- 	this.hmd.receiveShadow = true;
- 	this.hmd.scale.x = 0.1;
- 	this.mesh.add(this.hmd);
-
-
+ 	
  	this.updateHairs = function(){
  		var hairs = this.hairsTop.children;
  		var l = hairs.length;
@@ -206,9 +196,10 @@ GESMO.Pilot =function(){
  	}
  };
 
- GESMO.Airplane = function(){
+ GESMO.Airplane = function(font){
  	this.mesh = new THREE.Object3D();
  	this.mesh.name = "airplane";
+ 	this.font = font;
 
  	//Create the cabin
  	var geomCockpit = new THREE.BoxGeometry(60, 40, 30, 1, 1, 1);
@@ -346,24 +337,60 @@ GESMO.Pilot =function(){
 	this.mesh.castShadow = true;
 	this.mesh.receiveShadow = true;
 
-	this.buttons = {};
-	var btnGeom = new THREE.BoxGeometry(2, 3, 1);
+	this.addLabel = function(mesh, size, font){
+ 		var name = mesh.userData.name;
+ 		var mbox = new THREE.Box3().setFromObject(mesh);
+		var bSize = mbox.getSize().x;
+
+		var nameMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+		
+		var fnameGeometry = new THREE.TextGeometry(name, {
+			size: size,
+			height: 0,
+			bevelEnabled: false,
+			font: font,
+			weigth: "normal"
+		});
+
+		var fnameLabel = new THREE.Mesh(fnameGeometry, nameMaterial);
+		fnameLabel.name = "flabel";
+		fnameLabel.rotateX(-Math.PI/4);
+		mesh.add(fnameLabel);
+
+		var fbox = new THREE.Box3().setFromObject(fnameLabel);
+		var fSize = fbox.getSize().x;
+
+		var diff = (bSize/2 - fSize/2);
+	
+		fnameLabel.translateX(-fSize/2);
+ 	}
+
+	this.buttons = [];
+	var btnGeom = new THREE.BoxGeometry(2, 2, 2);
  	var btnMat = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.3, shading:THREE.FlatShading});
- 	var btn =  new THREE.Mesh(geomWindshield, matWindshield);
+ 	var btn =  new THREE.Mesh(btnGeom, btnMat);
+ 	btn.userData = {type: 'back', name: "Back"};
+ 	this.addLabel(btn, 0.4, this.font);
  	btn.position.set(28, 20, -10);
- 	btn.scale.set(0.1, 0.1, 0.1);
- 	btn.rotation.z = -Math.PI/2;
- 	this.buttons.back = btn;
+ 	btn.scale.y = 0.1;
+ 	this.buttons.push(btn);
  	this.mesh.add(btn);
 
- 	var btn1 = btn.clone();
+ 	var btn1 = new THREE.Mesh(btnGeom, btnMat.clone());
+ 	btn1.userData = {type: 'home', name: "Home"};
+ 	this.addLabel(btn1, 0.4, this.font);
  	btn1.position.set(28, 20, -6);
- 	this.buttons.home = btn1;
+ 	btn1.scale.y = 0.1;
+ 	this.buttons.push(btn1);
  	this.mesh.add(btn1);
+ 	
 
- 	var btn2 = btn.clone();
+ 	var btn2 = new THREE.Mesh(btnGeom, btnMat.clone());
+ 	btn2.userData = {type: 'queue', name: "Queue"};
+ 	this.addLabel(btn2, 0.4, this.font);
  	btn2.position.set(28, 20, -2);
- 	this.buttons.queue = btn2;
+ 	btn2.scale.y = 0.1;
+ 	this.buttons.push(btn2);
  	this.mesh.add(btn2);
 
  	var slotcoveringGeom = new THREE.BoxGeometry(3, 1, 2);
@@ -387,14 +414,20 @@ GESMO.Pilot =function(){
  	this.slot.scale.y = 0.4;
  	this.mesh.add(this.slot);
 
- 	var btn4 = btn.clone();
+ 	var btn4 = new THREE.Mesh(btnGeom, btnMat.clone());
+ 	btn4.userData = {type: 'fly', name: "Fly"};
+ 	this.addLabel(btn4, 0.4, this.font);
  	btn4.position.set(28, 20, 6);
- 	this.buttons.fly = btn4;
+ 	btn4.scale.y = 0.1;
+ 	this.buttons.push(btn4);
  	this.mesh.add(btn4);
 
- 	var btn5 = btn.clone();
+ 	var btn5 = new THREE.Mesh(btnGeom, btnMat.clone());
+ 	btn5.userData = {type: 'land', name: "Land"};
+ 	this.addLabel(btn5, 0.4, this.font);
  	btn5.position.set(28, 20, 10);
- 	this.buttons.land = btn5;
+ 	btn5.scale.y = 0.1;
+ 	this.buttons.push(btn5);
  	this.mesh.add(btn5);
 
 	this.movePropeller = false;
@@ -425,9 +458,9 @@ GESMO.Pilot =function(){
 			.to({ x: 0.1, y:0.1, z:0.1}, 100)
 			.easing(TWEEN.Easing.Exponential.InOut)
 			.start();
-	},
+	}
 
-	this.updatePlane= function(){
+	this.updatePlane = function(){
 	 	if(this.airplane.movePropeller){
 	 		this.airplane.propeller.rotation.x += 0.3;
 	 	}
@@ -439,7 +472,7 @@ GESMO.Pilot =function(){
  	var stepAngle = Math.PI/this.nClouds*2;
  	this.clouds = [];
 
-	var geom = new THREE.BoxGeometry(50, 50, 5);
+	var geom = new THREE.BoxGeometry(60, 60, 5);
 
  	for (var j = 0;j < this.nClouds;j++){
  		var b = stepAngle*j;

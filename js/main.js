@@ -6,30 +6,33 @@ var loadedData = [];
 var searchQueries = [];
 
 window.onload = function(){
+	//console.log()
+	//document.getElementById('playerContainer').style.display = "hidden";
+
 	ui = new GESMO.GesmoUI(document.getElementById('container'));
 	dataController = new GESMO.DataController();
 	player = new GESMO.GesmoPlayer([]);
-	// leapController = new Leap.Controller({ enableGestures: true })
-	// 	.use('transform', {
-	// 		position: new THREE.Vector3(0, -200, -400),
-	// 		effectiveParent: ui.camera
-	// 	})
-	// 	.use('riggedHand', {
-	// 		parent: ui.scene,
-	// 		renderer: ui.renderer,
-	// 		camera: ui.camera,
-	// 		materialOptions: {
-	// 	      wireframe: true,
-	// 	      color: new THREE.Color(0xcccccc)
-	// 	    },
-	// 		renderFn: function(){
-	// 			gestureController.update();
-	// 			ui.animate();
-	// 		}
-	// 	}).connect();
+	leapController = new Leap.Controller({ enableGestures: true })
+		.use('transform', {
+			position: new THREE.Vector3(0, -200, -400),
+			effectiveParent: ui.camera
+		})
+		.use('riggedHand', {
+			parent: ui.scene,
+			renderer: ui.renderer,
+			camera: ui.camera,
+			materialOptions: {
+		      wireframe: true,
+		      color: new THREE.Color(0xcccccc)
+		    },
+			renderFn: function(){
+				gestureController.update();
+				ui.animate();
+			}
+		}).connect();
 
 
-	//gestureController = new GESMO.GestureController(leapController, ui);
+	gestureController = new GESMO.GestureController(leapController, ui);
 
 	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
 		switch(event.detail.query.type){
@@ -41,13 +44,19 @@ window.onload = function(){
 
 			case "back" : {
 					searchQueries.pop();
-					dataController.fetchData(searchQueries[searchQueries.length - 1], dataFetched, dataFetchFailed);
+					console.log(searchQueries);
+					if(searchQueries.length == 0){
+						ui.createHome();
+					} else {
+						dataController.fetchData(searchQueries[searchQueries.length - 1], dataFetched, dataFetchFailed);
+					}
 				break;
 			}
 
 			case "home" : {
-					searchQueries.pop();
+					searchQueries.length = 0;
 					ui.createHome();
+					break;
 			}
 
 			default: {
@@ -63,13 +72,6 @@ window.onload = function(){
 	}.bind(this));
 
 	window.addEventListener('gesmo.ui.setupcomplete', function(){
-		console.log('here');	
-		var query = {
-			type: "home",
-			filterName: null,
-			filterValue: null
-		};
-		searchQueries.push(query);
 		ui.createHome();
 	}.bind(this));
 
@@ -113,7 +115,7 @@ window.onload = function(){
 		ui.onSongChange(event.detail.index);
 	});
 
-	loop();
+	//loop();
 };
 
 function loop(){
