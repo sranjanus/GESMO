@@ -6,99 +6,94 @@ var loadedData = [];
 var searchQueries = [];
 
 window.onload = function(){
-	ui = new GESMO.GesmoUI();
+	//console.log()
+	//document.getElementById('playerContainer').style.display = "hidden";
+
+	ui = new GESMO.GesmoUI(document.getElementById('container'));
 	dataController = new GESMO.DataController();
 	player = new GESMO.GesmoPlayer([]);
-	// leapController = new Leap.Controller({ enableGestures: true })
-	// 	.use('transform', {
-	// 		position: new THREE.Vector3(0, -200, -150),
-	// 		effectiveParent: ui.camera
-	// 	})
-	// 	.use('riggedHand', {
-	// 		parent: ui.scene,
-	// 		renderer: ui.renderer,
-	// 		camera: ui.camera,
-	// 		materialOptions: {
-	// 	      wireframe: false,
-	// 	      color: new THREE.Color(0xcccccc)
-	// 	    },
-	// 	    scale: 0.1,
-	// 		renderFn: function(){
-	// 			gestureController.update();
-	// 			ui.animate();
-	// 		}
-	// 	}).connect();
+	leapController = new Leap.Controller({ enableGestures: true })
+		.use('transform', {
+			position: new THREE.Vector3(0, -200, -400),
+			effectiveParent: ui.camera
+		})
+		.use('riggedHand', {
+			parent: ui.scene,
+			renderer: ui.renderer,
+			camera: ui.camera,
+			materialOptions: {
+		      wireframe: true,
+		      color: new THREE.Color(0xcccccc)
+		    },
+			renderFn: function(){
+				gestureController.update();
+				ui.animate();
+			}
+		}).connect();
 
 
-	//gestureController = new GESMO.GestureController(leapController, ui, player);
+	gestureController = new GESMO.GestureController(leapController, ui);
 
-	// leapController.on('ready', function () {  
-	// 	showMessage("Please connect device and perform a grab gesture with both hands to begin.");
-	// });
+	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
+		switch(event.detail.query.type){
+			case "queue" : {
+					sendQueueToUI();
+					searchQueries.push(event.detail.query);
+				break;
+			}
 
-	// window.addEventListener('gesmo.ui.fetchlibrary', function(event){
-	// 	switch(event.detail.query.type){
-	// 		case "queue" : {
-	// 				sendQueueToUI();
-	// 				searchQueries.push(event.detail.query);
-	// 			break;
-	// 		}
+			case "back" : {
+					searchQueries.pop();
+					console.log(searchQueries);
+					if(searchQueries.length == 0){
+						ui.createHome();
+					} else {
+						dataController.fetchData(searchQueries[searchQueries.length - 1], dataFetched, dataFetchFailed);
+					}
+				break;
+			}
 
-	// 		case "back" : {
-	// 				searchQueries.pop();
-	// 				if(searchQueries.length == 0){
-	// 					ui.createHome();
-	// 				} else {
-	// 					dataController.fetchData(searchQueries[searchQueries.length - 1], dataFetched, dataFetchFailed);
-	// 				}
-	// 			break;
-	// 		}
+			case "home" : {
+					searchQueries.length = 0;
+					ui.createHome();
+					break;
+			}
 
-	// 		case "home" : {
-	// 				searchQueries.length = 0;
-	// 				ui.createHome();
-	// 				break;
-	// 		}
-
-	// 		default: {
-	// 			dataController.fetchData(event.detail.query, dataFetched, dataFetchFailed);
-	// 			searchQueries.push(event.detail.query);
-	// 		}
-	// 	}
+			default: {
+				dataController.fetchData(event.detail.query, dataFetched, dataFetchFailed);
+				searchQueries.push(event.detail.query);
+			}
+		}
 		
-	// }.bind(this));
+	}.bind(this));
 
 	window.addEventListener('gesmo.ui.addtoqueue', function(event){
 		addToQueue(event.detail.type, event.detail.id);
 	}.bind(this));
 
 	window.addEventListener('gesmo.ui.setupcomplete', function(){
-		ui.createView(GESMO.HOMEVIEW);
+		ui.createHome();
 	}.bind(this));
 
-	window.addEventListener('gesmo.ui.startcomplete', function(){
-		//gestureController.setStartGesture();
-	}.bind(this));
+	window.addEventListener('resize', function(event){
+		ui.onWindowResize();
+	}.bind(this), false);
 
-	// window.addEventListener('resize', function(event){
-	// 	ui.onWindowResize();
-	// }.bind(this), false);
+	document.addEventListener('mousedown', function(event){
+		ui.onMouseDown(event);
+	}.bind(this), false);
 
-	// document.addEventListener('mousedown', function(event){
-	// 	ui.onMouseDown(event);
-	// }.bind(this), false);
+	document.addEventListener('mouseup', function(event) {
+		ui.onMouseUp(event);
+	}.bind(this), false);
 
-	// document.addEventListener('mouseup', function(event) {
-	// 	ui.onMouseUp(event);
-	// }.bind(this), false);
+	document.addEventListener('mousemove', function(event) {
+		ui.onMouseMove(event);
+	}.bind(this), false);
 
-	// document.addEventListener('mousemove', function(event) {
-	// 	ui.onMouseMove(event);
-	// }.bind(this), false);
-
-	// document.addEventListener('click', function(event) {
-	// 	ui.onClick(event);
-	// }.bind(this), false);
+	document.addEventListener('click', function(event) {
+		ui.onClick(event);
+	}.bind(this), false);
 
 	window.addEventListener('gesmo.actions.play', function(event){
 		player.play();
@@ -116,15 +111,11 @@ window.onload = function(){
 		player.skip("next");
 	}.bind(this));
 
-	// window.addEventListener('gesmo.player.newsong', function(event){
-	// 	ui.onSongChange(event.detail.index);
-	// }.bind(this));
+	window.addEventListener('gesmo.player.newsong', function(event){
+		ui.onSongChange(event.detail.index);
+	});
 
-	window.addEventListener('gesmo.gesture.startdectected', function(event){
-		openGates();
-	}.bind(this));
-
-	loop();
+	//loop();
 };
 
 function loop(){
@@ -142,7 +133,7 @@ function dataFetched(type, data){
 		});
 		loadedData.push(item);
 	}.bind(this));
-	//ui.showLibrary(type, dataList);
+	ui.showLibrary(type, dataList);
 }
 
 function dataFetchFailed(error){
@@ -153,7 +144,7 @@ function addToQueue(type, id){
 	if(type == "songs"){
 		var songObj = findObjectByKey(loadedData, "id", id);
 		if(songObj != null) { this.player.playlist.push(songObj); 
-			if(this.player.checkPlaylistState() == GESMO.PLAYLISTEMPTY){
+			if(this.player.checkState() == GESMO.PLAYLISTEMPTY){
 				this.player.play(0);
 			}
 		}
@@ -178,21 +169,5 @@ function sendQueueToUI(){
 			id: qItem.id
 		});
 	}.bind(this));
-	//ui.showLibrary("queueitem", dataList);
-}
-
-function openGates(){
-	var leftCurtainWid = $('#leftCurtain').width() + 5;
-	var rightCurtainWid = $('#rightCurtain').width() + 5;
-	var messageBrdHt = $('#messageboard').height() + 10;
-	$('#leftCurtain').animate({left: '-=' + leftCurtainWid+'px'}, 2000);
-	$('#rightCurtain').animate({right: '-=' + rightCurtainWid+'px'}, 2000);
-	$('#messageboard').animate({top: '-=' + messageBrdHt + 'px'}, 2000, function(){
-		ui.startDescent();
-	}.bind(this));
-}
-
-function showMessage(msg){
-	$('#messageboard').empty();
-	$('<p>').append(msg).appendTo($('#messageboard'));
+	ui.showLibrary("queue", dataList);
 }

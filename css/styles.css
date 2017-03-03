@@ -9,17 +9,15 @@ html {
 
 #playerContainer {
   position: relative;
-  width: 900px;
-  height: 120px;
-  left: 21%;
-  top: 5px;
+  width: 800px;
+  height: 200px;
   padding: 0;
   margin: 0;
   overflow: hidden;
   background: #bb71f3;
   background: -moz-linear-gradient(-45deg, #bb71f3 0%, #3d4d91 100%);
   background: -webkit-linear-gradient(-45deg, #bb71f3 0%, #3d4d91 100%);
-  background: linear-gradient(#e4e0ba, #f7d9aa);
+  background: linear-gradient(135deg, #00FFFF 0%, #3d4d91 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#bb71f3', endColorstr='#3d4d91', GradientType=1);
   font-family: "Helvetica Neue", "Futura", "Trebuchet MS", Arial;
   -webkit-user-select: none;
@@ -150,8 +148,8 @@ html {
   height: 30%;
   position: absolute;
   left: 0;
-  top: 0;
-  margin: 5% auto;
+  top: 50%;
+  margin: -15% auto;
   display: none;
   cursor: pointer;
   opacity: 0.8;

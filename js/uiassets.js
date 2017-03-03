@@ -2,20 +2,14 @@ GESMO.Island = function(topRadius, botRadius, height) {
 	this.mesh = new THREE.Object3D();
 	this.mesh.name = "island";
 
-	var geom = new THREE.CylinderGeometry(topRadius, botRadius, height, 20, 1);
+	var geom = new THREE.CylinderGeometry(topRadius, botRadius, height, 10, 5);
 	geom.mergeVertices();
-
-	geom.vertices[0].x -= 1057;
-	geom.vertices[0].z -= 1057;
-	geom.vertices[1].x -= 1057;
-	geom.vertices[1].z -= 2057;
-	geom.vertices[2].x -= 1057;
-	geom.vertices[2].z -= 1057;
-	geom.vertices[12].x -= 1057;
-	geom.vertices[12].z -= 1057;
-	geom.vertices[12].y += 500;
-	console.log(geom.vertices[12]);
-	
+	var l = geom.vertices.length;
+	for(var i = l/2;i < l;i++){
+		var vert = geom.vertices[i];
+		vert.x += 500 + Math.random()*900;
+		vert.z += -500 - Math.random()*900;
+	}
 	var mat = new THREE.MeshLambertMaterial({
 		color: 0x23190f,
 		shading: THREE.FlatShading
@@ -25,192 +19,16 @@ GESMO.Island = function(topRadius, botRadius, height) {
 	
 	var nProtrusions = 3 + Math.random()*6;
 	for(var i = 0; i < nProtrusions;i++){
-		var pGeom = new THREE.CylinderGeometry(Math.random()*(topRadius - 3000) + 1500, Math.random()*(botRadius - 100) + 100, height, 10, 5);
+		var pGeom = new THREE.CylinderGeometry(Math.random()*(topRadius - 3000) + 1500, Math.random()*(botRadius - 100) + 100, height/Math.floor(Math.random()*2 + 1), 10, 5);
 		var portrusion = new THREE.Mesh(pGeom, mat);
 		portrusion.position.x += 200 + Math.random()*400;
 		portrusion.position.y -= 200 + Math.random()*400;
+		//portrusion.rotation.z = -Math.random()*Math.PI/16;
 		this.mesh.add(portrusion);
 	}
 
 	this.mesh.receiveShadow = true;
 };
-
-GESMO.GrassyTerrain = function(radius){
-	var geom = new THREE.CylinderGeometry(radius, radius, 300, 20, 1);
-	geom.mergeVertices();
-	 geom.vertices[0].x -= 1057;
-	 geom.vertices[0].z -= 1057;
-	 geom.vertices[20].x -= 1057;
-	 geom.vertices[20].z -= 1057;
-	 geom.vertices[1].x -= 1057;
-	 geom.vertices[1].z -= 2057;	
-	 geom.vertices[21].x -= 1057;
-	 geom.vertices[21].z -= 2057;
-	 geom.vertices[2].x -= 1057;
-	 geom.vertices[2].z -= 1057;	
-	 geom.vertices[22].x -= 1057;
-	 geom.vertices[22].z -= 1057;
-	 geom.vertices[12].x -= 1057;
-	 geom.vertices[12].z -= 1057;
-	 geom.vertices[12].y += 500;
-	 geom.vertices[32].x -= 1057;
-	 geom.vertices[32].z -= 1057;
-	 geom.vertices[32].y += 500;
-
-	  geom.computeFaceNormals();
-	  geom.computeVertexNormals();
-
-	  this.mesh = new THREE.Mesh(geom, new THREE.MeshLambertMaterial({
-	    color: GESMO.Colors.greenDark,
-	    shading: THREE.FlatShading,
-	    side: THREE.DoubleSide
-	  }));
-
-	  this.mesh.receiveShadow = true;
-	  this.mesh.castShadow = true;
-	  this.mesh.name = "grass"
-};
-
-GESMO.Clouds = function(nClouds){
-	this.Cloud = function(){
-		this.mesh = new THREE.Object3D();
-
-		var mat = new THREE.MeshPhongMaterial({
-			color: GESMO.Colors.white,
-			shading: THREE.FlatShading
-		});
-
-		var cGeom = new THREE.DodecahedronGeometry(500, 1);
-		var center = new THREE.Mesh(cGeom, mat);
-		center.scale.x = 1.5;
-		this.mesh.add(center);
-
-		var lGeom = new THREE.DodecahedronGeometry(250, 1);
-		var left = new THREE.Mesh(lGeom, mat);
-		left.scale.x = 1.5;
-		this.mesh.add(left);
-		left.position.x -= 375;
-
-		var rGeom = new THREE.DodecahedronGeometry(250, 1);
-		var right = new THREE.Mesh(rGeom, mat);
-		right.scale.x = 1.5;
-		this.mesh.add(right);
-		right.position.x += 375;
-	}
-
-	this.mesh = new THREE.Object3D();
-	
-	for(var i = 0;i < nClouds;i++){
-		var theta = Math.PI*Math.random();
-		var phi = Math.PI*Math.random();
-		var radius = 2500 + Math.random()*4000;
-
-		var c = new this.Cloud();
-		c.mesh.position.x = radius*Math.cos(theta)*Math.cos(phi);
-		c.mesh.position.z = radius*Math.cos(theta)*Math.sin(phi);
-		c.mesh.position.y = radius*Math.sin(theta) + 1000;
-
-		this.mesh.add(c.mesh);
-	}
-}
-
-GESMO.Mountains = function(){
-	this.Mountain = function(){
-		this.greyMat = new THREE.MeshLambertMaterial({
-		    color: 0xa99a9d,
-		    shading: THREE.FlatShading,
-		    wireframe: false,
-		    side: THREE.DoubleSide
-		  });
-
-		  this.threegroup = new THREE.Group();
-
-		  /* var boxGeom = new THREE.CylinderGeometry(20 + Math.random() * 50, 76 + Math.random() * 200, Math.random() * 400 + 50, 20, 20, false);
-		   */
-		  var zeroVector = new THREE.Vector3();
-		  var size = Math.random() * 1000 + 1000;
-		  var heightScale = Math.random() * .5 + 4;
-		  var boxGeom = new THREE.PlaneGeometry(size, size, 8 + Math.floor(Math.random() * 3), 8 + Math.floor(Math.random() * 3));
-
-		  for (var i = 0; i < boxGeom.vertices.length; i++) {
-
-		    var vertex = boxGeom.vertices[i];
-		    // vertex.x =0;
-		    vertex.z = (-vertex.distanceTo(zeroVector) * .5) * heightScale + 15 + Math.random() * 3 - 6;
-
-		    vertex.y += Math.random() * 10 - 5;
-		    vertex.x += Math.random() * 10 - 5;
-		    vertex.z += Math.random() * 20 - 10;
-
-		  }
-		  boxGeom.computeFaceNormals();
-		  boxGeom.computeVertexNormals();
-
-		  this.boxMesh = new THREE.Mesh(boxGeom, this.greyMat);
-		  var box = new THREE.Box3().setFromObject(this.boxMesh);
-		  this.boxMesh.position.y = Math.random() * 15 + 10;
-		  this.boxMesh.rotation.x = -Math.PI / 2;
-		  this.threegroup.add(this.boxMesh);
-
-		  this.threegroup.traverse(function(object) {
-		    if (object instanceof THREE.Mesh) {
-		      object.castShadow = true;
-		      object.receiveShadow = true;
-		    }
-		  });
-	}
-
-	this.mesh = new THREE.Object3D();
-	var noM = 3;
-	var radius = 2500;
-	var angle = Math.PI/8;
-	for(var i = 0;i < noM;i++){
-		var m = new this.Mountain();
-		m.threegroup.position.x = radius*Math.cos(angle*i);
-		m.threegroup.position.z = radius*Math.sin(angle*i);
-		this.mesh.add(m.threegroup);
-	}
-}
-
-GESMO.Forest = function(radius, startAngle, endAngle, layers){
-	this.Tree = function(){
-		this.mesh = new THREE.Object3D();
-
-		var tgeom = new THREE.CylinderGeometry(30, 30, 250, 5);
-		var tmat = new THREE.MeshPhongMaterial({
-			color: GESMO.Colors.brown,
-			shading: THREE.FlatShading
-		});
-		var trunk = new THREE.Mesh(tgeom,tmat);
-		this.mesh.add(trunk);
-
-		var lgeom = new THREE.DodecahedronGeometry(250, 1);
-		var lmat = new THREE.MeshPhongMaterial({
-			color: GESMO.Colors.treeColor,
-			shading: THREE.FlatShading
-		});
-		var leaves = new THREE.Mesh(lgeom, lmat);
-		this.mesh.add(leaves);
-		leaves.position.y += 250;
-	}
-
-	this.mesh = new THREE.Object3D();
-	var pertx = 0, perty = 0;
-	for(var i = 0;i < layers;i++){
-		radius += 100;
-		for(var theta = startAngle;theta <= endAngle;theta += Math.PI/32){
-			var t = new this.Tree();
-			pertx = Math.floor(Math.random() * 210) - 100;
-			perty = Math.floor(Math.random() * 210) - 100;
-			t.mesh.position.x = radius*Math.cos(theta) + pertx;
-			t.mesh.position.z = radius*Math.sin(theta) + perty;
-
-			this.mesh.add(t.mesh);
-		}
-	}
-}
-
-
 
 GESMO.Water = function(radius){
 	var geom = new THREE.CylinderGeometry(radius, radius, 150, 10, 5);
@@ -256,6 +74,32 @@ GESMO.Water = function(radius){
 
  		this.mesh.geometry.verticesNeedUpdate = true;
  	}
+}
+
+GESMO.GrassyTerrain = function(radius){
+	var geom = new THREE.CylinderGeometry(radius, radius, 150, 10, 20);
+	geom.mergeVertices();
+	for (var i = 0; i < geom.vertices.length; i++) {
+	    var vertex = geom.vertices[i];
+
+	    var theta = Math.random()*Math.PI/8;
+
+	    vertex.z += 100*Math.sin(theta);
+	    vertex.x += 100*Math.cos(theta);
+	}
+
+	  geom.computeFaceNormals();
+	  geom.computeVertexNormals();
+	  this.mesh = new THREE.Mesh(geom, new THREE.MeshLambertMaterial({
+	    color: GESMO.Colors.greenDark,
+	    shading: THREE.FlatShading,
+	    side: THREE.DoubleSide
+	  }));
+	  //this.mesh.rotation.x = -Math.PI / 2;
+	  //this.mesh.position.y = -14;
+	  this.mesh.receiveShadow = true;
+	  this.mesh.castShadow = true;
+	  this.mesh.name = "grass"
 }
 
 GESMO.Pilot =function(){
@@ -412,14 +256,8 @@ GESMO.Pilot =function(){
  	sideWing.receiveShadow = true;
  	this.mesh.add(sideWing);
 
- 	var geomWindshield = new THREE.BoxGeometry(1,30,200, 1, 1, 1);
- 	var matWindshield = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.5, shading:THREE.FlatShading});
- 	this.hmd = new THREE.Mesh(geomWindshield, matWindshield);
- 	this.hmd.position.set(100, 85, 0);
- 	this.hmd.castShadow = true;
- 	this.hmd.receiveShadow = true;
- 	this.hmd.scale.x = 0.1;
- 	this.mesh.add(this.hmd);
+ 	var geomWindshield = new THREE.BoxGeometry(1,20,20, 1, 1, 1);
+ 	var matWindshield = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.3, shading:THREE.FlatShading});
 
  	// Create the propeller
  	var geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
@@ -530,6 +368,30 @@ GESMO.Pilot =function(){
 	this.buttons = [];
 	var btnGeom = new THREE.BoxGeometry(2, 2, 2);
  	var btnMat = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.3, shading:THREE.FlatShading});
+ 	var btn =  new THREE.Mesh(btnGeom, btnMat);
+ 	btn.userData = {type: 'back', name: "Back"};
+ 	this.addLabel(btn, 0.4, this.font);
+ 	btn.position.set(28, 20, -10);
+ 	btn.scale.y = 0.1;
+ 	this.buttons.push(btn);
+ 	this.mesh.add(btn);
+
+ 	var btn1 = new THREE.Mesh(btnGeom, btnMat.clone());
+ 	btn1.userData = {type: 'home', name: "Home"};
+ 	this.addLabel(btn1, 0.4, this.font);
+ 	btn1.position.set(28, 20, -6);
+ 	btn1.scale.y = 0.1;
+ 	this.buttons.push(btn1);
+ 	this.mesh.add(btn1);
+ 	
+
+ 	var btn2 = new THREE.Mesh(btnGeom, btnMat.clone());
+ 	btn2.userData = {type: 'queue', name: "Queue"};
+ 	this.addLabel(btn2, 0.4, this.font);
+ 	btn2.position.set(28, 20, -2);
+ 	btn2.scale.y = 0.1;
+ 	this.buttons.push(btn2);
+ 	this.mesh.add(btn2);
 
  	var slotcoveringGeom = new THREE.BoxGeometry(3, 1, 2);
  	var slotcoveringMat = new THREE.MeshPhongMaterial({
@@ -574,52 +436,50 @@ GESMO.Pilot =function(){
 	
 	this.startAirplane = function(){
 		new TWEEN.Tween(this.blade1.scale)
-			.to({ x: 1, y:1, z:1}, 1000)
+			.to({ x: 1, y:1, z:1}, 100)
 			.easing(TWEEN.Easing.Exponential.InOut)
 			.start();
 
 		new TWEEN.Tween(this.blade2.scale)
-			.to({ x: 1, y:1, z:1}, 1000)
+			.to({ x: 1, y:1, z:1}, 100)
 			.easing(TWEEN.Easing.Exponential.InOut)
-			.onComplete(function(){
-				this.movePropeller = true;
-			}.bind(this))
 			.start();
+		this.movePropeller = true;
 	}
 
 	this.stopAirplane = function(){
 		this.movePropeller = false;
 		new TWEEN.Tween(this.blade1.scale)
-			.to({ x: 0.1, y:0.1, z:0.1}, 1000)
+			.to({ x: 0.1, y:0.1, z:0.1}, 100)
 			.easing(TWEEN.Easing.Exponential.InOut)
 			.start();
 
 		new TWEEN.Tween(this.blade2.scale)
-			.to({ x: 0.1, y:0.1, z:0.1}, 1000)
+			.to({ x: 0.1, y:0.1, z:0.1}, 100)
 			.easing(TWEEN.Easing.Exponential.InOut)
 			.start();
 	}
 
 	this.updatePlane = function(){
-	 	if(this.movePropeller){
-	 		this.propeller.rotation.x += 0.3;
+	 	if(this.airplane.movePropeller){
+	 		this.airplane.propeller.rotation.x += 0.3;
 	 	}
 	}
  };
 
  GESMO.SpaceDebris= function(env){
-	var nClouds = 40;
- 	var stepAngle = Math.PI/nClouds*2;
+	this.nClouds = 40;
+ 	var stepAngle = Math.PI/this.nClouds*2;
  	this.clouds = [];
 
 	var geom = new THREE.BoxGeometry(60, 60, 5);
 
- 	for (var j = 0;j < nClouds;j++){
+ 	for (var j = 0;j < this.nClouds;j++){
  		var b = stepAngle*j;
- 		var t = 3250 + Math.random()*1000;
-	 	for(var i = 0;i < nClouds;i++){
+ 		var t = 5250 + Math.random()*1000;
+	 	for(var i = 0;i < this.nClouds;i++){
 	 		var a = stepAngle*i;
-		 	var h = 3250 + Math.random()*1000;
+		 	var h = 5250 + Math.random()*1000;
 	 		for(var k = 0;k < 3;k++){
 	 			var mat = new THREE.MeshPhongMaterial({
 						color: Math.random() * 0xffffff - 0x110000,
@@ -632,28 +492,17 @@ GESMO.Pilot =function(){
 	 			m.castShadow = true;
 	 			m.receiveShadow = true;
 		 		
-		 		m.position.y = Math.sin(a)*h*Math.sin(b)*(i+1)*(1+Math.random());
-		 		m.position.x = Math.cos(a)*h*Math.sin(b)*(i+1)*(1+Math.random());
+		 		m.position.y = Math.sin(a)*h*Math.sin(b)*(i+1);
+		 		m.position.x = Math.cos(a)*h*Math.sin(b)*(i+1);
 
 		 		/*note: rotating cloud according to its position*/
-		 		m.rotation.z = a + Math.PI/2*Math.random();
+		 		m.rotation.z = a + Math.PI/2;
 		 		/*note: placing clouds at random depth inside the cave*/
-		 		m.position.z = t*Math.cos(b)*(i+1)*(1+Math.random());
+		 		m.position.z = t*Math.cos(b)*(i+1);
 
 		 		this.clouds.push(m);
 		 		env.add(m);
 	 		}
 	 	}
 	 }
-
-	 this.movedust = function(){
- 		var nop = this.clouds.length;
- 		for(var i = 0;i < nop;i++){
- 			var v = this.clouds[i];
-
- 			var angle = Math.random()*Math.PI*2;
- 			v.position.x = v.position.x + Math.cos(angle)*5250;
- 			v.position.y = v.position.y + Math.sin(angle)*5250;
- 		}
- 	}
  };
