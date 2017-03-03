@@ -3,17 +3,32 @@
  * Authors: @Shashank, @Bahar
  */
 
-//var elms = ['track', 'timer', 'duration', 'playBtn', 
-//'pauseBtn', 'prevBtn', 'nextBtn', 'volumeBtn', 'progress', 'bar', 'wave', 
-//'loading', 'playlist', 'list', 'volume', 'barEmpty', 'barFull', 'sliderBtn'];
+var elms = ['track', 'timer', 'duration', 'playBtn', 
+'pauseBtn', 'prevBtn', 'nextBtn', 'volumeBtn', 'progress', 'bar', 'wave', 
+'loading', 'playlist', 'list', 'volume', 'barEmpty', 'barFull', 'sliderBtn'];
 
 GESMO.GesmoPlayer = function(songList/*, elmList*/){
 	this.playlist = songList;
 	this.index = 0;
 
-	// for UI
-	//this.elementList = elmList;
-	//this.elementList.track.innerHTML = '1.' + this.playlist[0].title;
+	if(this.playlist.length)
+		track.innerHTML = '1. ' + this.playlist[0].name;
+
+	elms.forEach(function(elm) {
+	  window[elm] = document.getElementById(elm);
+	});
+
+	this.wave = new SiriWave({
+	    container: window.waveform,
+	    width: window.innerWidth,
+	    height: window.innerHeight * 0.3,
+	    cover: true,
+	    speed: 0.03,
+	    amplitude: 0.7,
+	    frequency: 2
+	});
+	this.wave.start();
+	this.state = GESMO.STOPPED;
 };
 
 GESMO.GesmoPlayer.prototype = {
@@ -27,60 +42,68 @@ GESMO.GesmoPlayer.prototype = {
 		if(data.howl){
 			sound = data.howl;
 		} else {
+			console.log(data.path);
 			sound = data.howl = new Howl({
 				src: data.path,
 				onplay: function(){
 					// for UI
-					//this.elementList.duration.innerHTML = self.formatTime(Math.round(sound.duration()));
+					duration.innerHTML = self.formatTime(Math.round(sound.duration()));
 					// --
 
 					requestAnimationFrame(self.step.bind(self));
 
 					// for UI
-					//this.elementList.wave.container.style.display = 'block';
-					//this.elementList.bar.style.display = 'none';
-					//this.elementList.pauseBtn.style.display = 'block';
+					this.wave.container.style.display = 'block';
+					bar.style.display = 'none';
+					pauseBtn.style.display = 'block';
 					// --
-				},
+				}.bind(this),
 				onload: function(){
 					// for UI
-					//this.elementList.wave.container.style.display = 'block';
-					//this.elementList.bar.style.display = 'none';
-					//this.elementList.loading.style.display = 'none';
-				},
+					this.wave.container.style.display = 'block';
+					bar.style.display = 'none';
+					loading.style.display = 'none';
+				}.bind(this),
 				onend: function(){
 					// for UI
-					//this.elementList.wave.container.style.display = 'none';
-					//this.elementList.bar.style.display = 'block';
+					this.wave.container.style.display = 'none';
+					bar.style.display = 'block';
 					//---
 					self.skip('right');
-				},
+				}.bind(this),
 				onpause: function(){
 					// for UI
-					//this.elementList.wave.container.style.display = 'none';
-					//this.elementList.bar.style.display = 'block';
+					this.wave.container.style.display = 'none';
+					bar.style.display = 'block';
+					pauseBtn.style.display = "none";
 					//--
-				}
+				}.bind(this),
+				onstop: function() {
+		          // Stop the wave animation.
+		          this.wave.container.style.display = 'none';
+		          bar.style.display = 'block';
+		        }.bind(this)
 			});
 		}
 
 		sound.play();
 
 		// for UI
-		//this.elementList.track.innerHTML = (index + 1) + '. ' + data.title;
+		track.innerHTML = (index + 1) + '. ' + data.name;
 
 		if(sound.state() === 'loaded') {
 			// for UI
-			//this.elementList.playBtn.style.display = 'none';
-			//this.elementList.pauseBtn.style.display = 'block';
+			playBtn.style.display = 'none';
+			pauseBtn.style.display = 'block';
 		} else {
 			// for UI
-			//this.elementList.loading.style.display = 'block';
-			//this.elementList.playBtn.style.display = 'none';
-			//this.elementList.pauseBtn.style.display = 'none';
+			loading.style.display = 'block';
+			playBtn.style.display = 'none';
+			pauseBtn.style.display = 'none';
 		}
 
 		self.index = index;
+		this.state = GESMO.PLAYING;
 		var event = new CustomEvent('gesmo.player.newsong', {
 			detail: {
 				index: self.index
@@ -96,8 +119,10 @@ GESMO.GesmoPlayer.prototype = {
 
 		sound.pause();
 		// for UI
-		//this.elementList.playBtn.style.display = 'block';
-		//this.elementList.pauseBtn.style.display = 'none';
+		playBtn.style.display = 'block';
+		pauseBtn.style.display = 'none';
+
+		this.state = GESMO.PAUSED;
 	},
 
 	skip: function(direction){
@@ -129,7 +154,7 @@ GESMO.GesmoPlayer.prototype = {
 
 	    // for UI
 	    // Reset progress.
-	    //this.elementList.progress.style.width = '0%';
+	    progress.style.width = '0%';
 
 	    // Play the new track.
 	    self.play(index);
@@ -144,8 +169,8 @@ GESMO.GesmoPlayer.prototype = {
 	    // for UI
 	    // Update the display on the slider.
 	    var barWidth = (val * 90) / 100;
-	    //this.elementList.barFull.style.width = (barWidth * 100) + '%';
-	    //this.elementList.sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
+	    barFull.style.width = (barWidth * 100) + '%';
+	    sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
 	 },
 
 	seek: function(per) {
@@ -169,14 +194,27 @@ GESMO.GesmoPlayer.prototype = {
 	    // for UI
 	    // Determine our current seek position.
 	    var seek = sound.seek() || 0;
-	    //this.elementList.timer.innerHTML = self.formatTime(Math.round(seek));
-	    //this.elementList.progress.style.width = (((seek / sound.duration()) * 100) || 0) + '%';
+	    timer.innerHTML = self.formatTime(Math.round(seek));
+	    progress.style.width = (((seek / sound.duration()) * 100) || 0) + '%';
 
 	    // If the sound is still playing, continue stepping.
 	    if (sound.playing()) {
 	      requestAnimationFrame(self.step.bind(self));
 	    }
 	},
+
+	 /**
+	   * Toggle the volume display on/off.
+	   */
+	  toggleVolume: function() {
+	    var self = this;
+	    var display = (volume.style.display === 'block') ? 'none' : 'block';
+
+	    setTimeout(function() {
+	      volume.style.display = display;
+	    }, (display === 'block') ? 0 : 500);
+	    volume.className = (display === 'block') ? 'fadein' : 'fadeout';
+	  },
 
 	formatTime: function(secs) {
 	    var minutes = Math.floor(secs / 60) || 0;
@@ -185,16 +223,52 @@ GESMO.GesmoPlayer.prototype = {
 	    return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 	},
 
+	setSliderDown: function(value){
+		window.sliderDown = value;
+	},
+
+	move: function(event){
+		if(window.sliderDown){
+			var x = event.clientX || event.touches[0].clientX;
+    		var startX = window.innerWidth * 0.05;
+    		var layerX = x - startX;
+    		var per = Math.min(1, Math.max(0, layerX / parseFloat(barEmpty.scrollWidth)));
+    		player.volume(per);
+		}
+	},
+
 	addToPlaylist: function(data){
 		this.playlist.push(data);
 	},
 
-	checkState: function(){
+	checkPlaylistState: function(){
 		if(this.playlist.length == 1){
 			return GESMO.PLAYLISTEMPTY;
 		} else {
-			return GESMO.MUSICPLAYING; 
+			return GESMO.PLAYLISTNOTEMPTY; 
 		}
+	},
+
+	resize: function(){
+	  var height = window.innerHeight * 0.3;
+	  var width = window.innerWidth;
+	  wave.height = height;
+	  wave.height_2 = height / 2;
+	  wave.MAX = wave.height_2 - 4;
+	  wave.width = width;
+	  wave.width_2 = width / 2;
+	  wave.width_4 = width / 4;
+	  wave.canvas.height = height;
+	  wave.canvas.width = width;
+	  wave.container.style.margin = -(height / 2) + 'px auto';
+
+	  // Update the position of the slider.
+	  var sound = player.playlist[player.index].howl;
+	  if (sound) {
+	    var vol = sound.volume();
+	    var barWidth = (vol * 0.9);
+	    sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
+	  }
 	}
 };
 
