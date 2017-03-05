@@ -6,15 +6,12 @@ var loadedData = [];
 var searchQueries = [];
 
 window.onload = function(){
-	//console.log()
-	//document.getElementById('playerContainer').style.display = "hidden";
-
-	ui = new GESMO.GesmoUI(document.getElementById('container'));
+	ui = new GESMO.GesmoUI();
 	dataController = new GESMO.DataController();
 	player = new GESMO.GesmoPlayer([]);
 	leapController = new Leap.Controller({ enableGestures: true })
 		.use('transform', {
-			position: new THREE.Vector3(0, -200, -400),
+			position: new THREE.Vector3(0, -200, -150),
 			effectiveParent: ui.camera
 		})
 		.use('riggedHand', {
@@ -22,9 +19,10 @@ window.onload = function(){
 			renderer: ui.renderer,
 			camera: ui.camera,
 			materialOptions: {
-		      wireframe: true,
+		      wireframe: false,
 		      color: new THREE.Color(0xcccccc)
 		    },
+		    scale: 0.1,
 			renderFn: function(){
 				gestureController.update();
 				ui.animate();
@@ -32,7 +30,11 @@ window.onload = function(){
 		}).connect();
 
 
-	gestureController = new GESMO.GestureController(leapController, ui);
+	gestureController = new GESMO.GestureController(leapController, ui, player);
+
+	leapController.on('ready', function () {  
+		showMessage("Please connect device and perform a grab gesture with both hands to begin.");
+	});
 
 	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
 		switch(event.detail.query.type){
@@ -75,6 +77,10 @@ window.onload = function(){
 		ui.createHome();
 	}.bind(this));
 
+	window.addEventListener('gesmo.ui.startcomplete', function(){
+		gestureController.setStartGesture();
+	}.bind(this));
+
 	window.addEventListener('resize', function(event){
 		ui.onWindowResize();
 	}.bind(this), false);
@@ -113,9 +119,17 @@ window.onload = function(){
 
 	window.addEventListener('gesmo.player.newsong', function(event){
 		ui.onSongChange(event.detail.index);
-	});
+	}.bind(this));
+
+	window.addEventListener('gesmo.gesture.startdectected', function(event){
+		openGates();
+	}.bind(this));
 
 	//loop();
+
+	// setTimeout(function() {
+	// 	openGates();
+	// }.bind(this), 100);
 };
 
 function loop(){
@@ -144,7 +158,7 @@ function addToQueue(type, id){
 	if(type == "songs"){
 		var songObj = findObjectByKey(loadedData, "id", id);
 		if(songObj != null) { this.player.playlist.push(songObj); 
-			if(this.player.checkState() == GESMO.PLAYLISTEMPTY){
+			if(this.player.checkPlaylistState() == GESMO.PLAYLISTEMPTY){
 				this.player.play(0);
 			}
 		}
@@ -169,5 +183,21 @@ function sendQueueToUI(){
 			id: qItem.id
 		});
 	}.bind(this));
-	ui.showLibrary("queue", dataList);
+	ui.showLibrary("queueitem", dataList);
+}
+
+function openGates(){
+	var leftCurtainWid = $('#leftCurtain').width() + 5;
+	var rightCurtainWid = $('#rightCurtain').width() + 5;
+	var messageBrdHt = $('#messageboard').height() + 10;
+	$('#leftCurtain').animate({left: '-=' + leftCurtainWid+'px'}, 2000);
+	$('#rightCurtain').animate({right: '-=' + rightCurtainWid+'px'}, 2000);
+	$('#messageboard').animate({top: '-=' + messageBrdHt + 'px'}, 2000, function(){
+		ui.startDescent();
+	}.bind(this));
+}
+
+function showMessage(msg){
+	$('#messageboard').empty();
+	$('<p>').append(msg).appendTo($('#messageboard'));
 }

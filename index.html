@@ -8,7 +8,7 @@
 		<!-- threeJs files -->
 		<script type="text/javascript" src="js/three.min.js"></script>
 		<script type="text/javascript" src="js/OBJLoader.js"></script>
-		<script type="text/javascript" src="js/PLYLoader.js"></script>
+		<script type="text/javascript" src="js/MTLLoader.js"></script>
 		<script type="text/javascript" src="js/TrackballControls.js"></script>
 		<script type="text/javascript" src="js/tween.min.js"></script>
 		<script type="text/javascript" src="js/CSS3DRenderer.js"></script>
@@ -27,11 +27,61 @@
   		<script type="text/javascript" src="js/player/siriwave.js"></script>
 		<style type="text/css">
 			body { font: 12pt monospace; margin: 0; overflow: hidden; background: linear-gradient(#e4e0ba, #f7d9aa);}
+
+			#curtainContainer {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 999;
+			}
+
+			.openingCurtain {
+				position: relative;
+				width: 49.5%;
+				height: 100%;
+				background: black;
+				border: 5px dashed gray;
+				z-index: 1000;
+			}
+
+			#leftCurtain {
+				border-left: none;
+				float: left;
+			}
+
+			#rightCurtain{
+				float: right;
+				border-right: none;
+			}
+
+			#messageboard{
+				width: 500px;
+				height: 100%;
+				position: relative;
+				margin: auto auto;
+				border: 5px dashed gray;
+				background: black;
+				color: white;
+				text-align: center;
+				font-size: 20px;
+				z-index: 1000;
+				vertical-align: middle;
+			}
+
+			#messageboard p{
+				position: absolute;
+				top: 50%;
+				text-align: center;
+				vertical-align: middle;
+				display: block;
+			}
 		</style>
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 	</head>
 	<body>
-		<div id="container"></div>
+		<!--<div id="container"></div>-->
 		<div id="playerContainer">
 			<div id="title">
 			    <span id="track"></span>
@@ -49,7 +99,6 @@
 		      <div class="btn" id="prevBtn"></div>
 		      <div class="btn" id="stopBtn"></div>
 		    </div>
-		    <div class="btn" id="playlistBtn"></div>
 		    <div class="btn" id="volumeBtn"></div>
 		  </div>
 
@@ -64,6 +113,11 @@
 		    <div id="barEmpty" class="bar"></div>
 		    <div id="sliderBtn"></div>
 		  </div>
+		</div>
+		<div id="curtainContainer">
+			<div id="leftCurtain" class="openingCurtain"></div>
+			<div id="rightCurtain" class="openingCurtain"></div>
+			<div id="messageboard"></div>
 		</div>
 		<script type="text/javascript" src="js/gesmo.js"></script>
 		<script type="text/javascript" src="js/DataController.js"></script>

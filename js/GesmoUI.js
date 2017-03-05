@@ -9,7 +9,6 @@
 
  	// Create the scene and add fog effect
  	this.scene = new THREE.Scene();
- 	this.cssScene = new THREE.Scene();
  	//this.scene.fog = new THREE.Fog(0xf7d9aa, 10000, 95000);
 
  	// Create the camera
@@ -20,8 +19,8 @@
  	this.camera = new THREE.PerspectiveCamera(fieldOfView, aspectratio,
  												nearPlane, farPlane);
  	this.camera.position.x = 3;
- 	this.camera.position.z = 0; //10000;
- 	this.camera.position.y = 0; //3000
+ 	this.camera.position.z = 0;//7500; 
+ 	this.camera.position.y = 0;//600; 
  	this.camera.lookAt(new THREE.Vector3(0,0,0));
 
  	// Create the renderer
@@ -30,29 +29,10 @@
 	this.renderer.setSize( window.innerWidth, window.innerHeight );
 	this.renderer.sortObjects = false;
 	this.renderer.shadowMap.enabled = true;
-	this.container.appendChild( this.renderer.domElement );
-	this.renderer.domElement.style.zIndex = 0;
-
-	var playerContainer = document.getElementById('playerContainer');
-	this.cssRenderer = new THREE.CSS3DRenderer();
-	this.cssRenderer.setSize(playerContainer.innerWidth, playerContainer.innerHeight);
-	this.cssRenderer.domElement.style.position = 'absolute';
-	this.cssRenderer.domElement.style.top = 0;
-	this.renderer.domElement.appendChild(this.cssRenderer.domElement);
-
-	var hmdGeom = new THREE.BoxGeometry(1,1,8, 1, 1, 1);
- 	var hmdMat = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.8, shading:THREE.FlatShading});
- 	this.hmd = new THREE.Mesh(hmdGeom, hmdMat);
- 	this.hmd.position.set(21, 29.5, 0);
- 	this.hmd.castShadow = true;
- 	this.hmd.receiveShadow = true;
- 	this.hmd.scale.x = 0.1;
- 	this.scene.add(this.hmd);
-
-	this.cssPlayer = new THREE.CSS3DObject(playerContainer);
-	//this.cssPlayer.position.set(21, 29.5, 0);
-	this.cssScene.add(this.cssPlayer);
-	//cssObject.position.x = 
+	this.renderer.domElement.style.position = 'absolute';
+	this.renderer.domElement.style.top = 0;
+	this.renderer.domElement.style.zIndex = 5;
+	document.body.appendChild(this.renderer.domElement);
 
 	this.movableObjects = new THREE.Object3D();
 	this.scene.add(this.movableObjects);
@@ -77,13 +57,28 @@
 
  	// Create the scene
  	// Create the Island
- 	this.island = new GESMO.Island(10000, 500, 9000);
+ 	this.island = new GESMO.Island(3500, 500, 3000);
  	this.movableObjects.add(this.island.mesh);
- 	this.island.mesh.position.y = -4600;
+ 	this.island.mesh.position.y = -1725;
 
- 	this.grass = new GESMO.GrassyTerrain(10000);
- 	this.grass.mesh.position.y = 4500;
+ 	this.grass = new GESMO.GrassyTerrain(3500);
+ 	this.grass.mesh.position.y = 1540;
  	this.island.mesh.add(this.grass.mesh);
+
+ 	this.mountains = new GESMO.Mountains();
+ 	this.movableObjects.add(this.mountains.mesh);
+ 	this.mountains.mesh.rotateY(-3*Math.PI/4);
+ 	this.mountains.mesh.position.y = 1500;
+ 	
+ 	this.forest1 = new GESMO.Forest(2000, -Math.PI/3, Math.PI/4, 12);
+ 	this.movableObjects.add(this.forest1.mesh);
+
+ 	this.forest2 = new GESMO.Forest(500, Math.PI/2, 5*Math.PI/4, 10);
+ 	this.movableObjects.add(this.forest2.mesh);
+ 	this.forest2.mesh.translateX(-400);
+
+ 	this.clouds = new GESMO.Clouds(7);
+ 	this.movableObjects.add(this.clouds.mesh);
 
  	this.spaceDebris = new GESMO.SpaceDebris(this.movableObjects);
 
@@ -106,17 +101,18 @@
  		shading: THREE.FlatShading
  	});
  	this.slotO = new THREE.Mesh(slotGeom, slotOMat);
- 	this.slotO.position.set(21, 24.5, 0.75);
+ 	this.slotO.position.set(21, 23, 1.2);
  	this.slotO.scale.x = 0.2;
  	this.slotO.scale.y = 0.05;
  	this.slotO.scale.z = 0.12;
  	this.scene.add(this.slotO);
  	this.queuePool = [];
+ 	this.buttons = [];
+ 	this.isFetchingData = false;
 
-	// this.trackballControls = new THREE.TrackballControls(this.camera);
+	//this.trackballControls = new THREE.TrackballControls(this.camera);
 	// this.trackballControls.noRotate = true;
 	// this.trackballControls.noPan = true;
-	this.clock = new THREE.Clock();
 
 	this.mousePos = new THREE.Vector2();
 	this.clock = new THREE.Clock(); 
@@ -142,9 +138,9 @@
 	    ];
 
 	this.mainList = [
-		{type: 'artistsList', name: "Artists" },
-		{type: 'topCharts', name: "Top Charts"},
 		{type: 'newReleases', name: "New Relases"},
+		{type: 'topCharts', name: "Top Charts"},
+		{type: 'artistsList', name: "Artists" },
 		{type: 'musicLibrary', name: "My Music" },
 		{type: 'stations', name: "Stations"}
 	];
@@ -152,16 +148,49 @@
 	var fontLoader = new THREE.FontLoader();
 	fontLoader.load("fonts/helvetiker_bold.typeface.json", function(font){
 		this.titleFont = font;
-		this.airplane = new GESMO.Airplane(this.titleFont);
+
+ 		var btnGeom = new THREE.BoxGeometry(50, 25, 10);
+	 	var btnMat = new THREE.MeshPhongMaterial({color: GESMO.Colors.white, transparent: true, opacity:0.5, shading:THREE.FlatShading});
+	 	var btn =  new THREE.Mesh(btnGeom, btnMat);
+	 	btn.userData = {type: 'back', name: "Back"};
+	 	this.addLabels(btn, 4);
+	 	btn.position.set(250*Math.cos(Math.PI/8), -25, 250*Math.sin(Math.PI/4));
+	 	btn.lookAt(new THREE.Vector3(0, 0, 0));
+	 	this.buttons.push(btn);
+	 	this.musicBox.add(btn);
+
+	 	var btn1 = new THREE.Mesh(btnGeom, btnMat.clone());
+	 	btn1.userData = {type: 'home', name: "Home"};
+	 	this.addLabels(btn1, 4);
+	 	btn1.position.set(250*Math.cos(0), -25, 250*Math.sin(0));
+	 	btn1.lookAt(new THREE.Vector3(0, 0, 0));
+	 	this.buttons.push(btn1);
+	 	this.musicBox.add(btn1);
+	 	
+
+	 	var btn2 = new THREE.Mesh(btnGeom, btnMat.clone());
+	 	btn2.userData = {type: 'queue', name: "Queue"};
+	 	this.addLabels(btn2, 4);
+	 	btn2.position.set(250*Math.cos(-Math.PI/8), -25, 250*Math.sin(-Math.PI/4));
+	 	btn2.lookAt(new THREE.Vector3(0, 0, 0));
+	 	this.buttons.push(btn2);
+	 	this.musicBox.add(btn2);
+
+	 	this.airplane = new GESMO.Airplane(this.titleFont);
  		//this.airplane.mesh.scale.set(0.25, 0.25, 0.25);
  		this.scene.add(this.airplane.mesh);
 
  		this.pilot = new GESMO.Pilot();
- 		this.pilot.mesh.position.set(8, 27, 0);
+ 		this.pilot.mesh.position.set(2, 27, 0);
  		this.airplane.mesh.add(this.pilot.mesh);
 
  		this.pilot.camPoint.add(this.camera);
  		this.camera.lookAt(this.airplane.propeller.position);
+
+ 		this.airplane.mesh.position.set(-20000, 20000, -20000);
+ 		this.initPlaneRot = this.airplane.mesh.rotation.clone();
+ 		this.airplane.mesh.rotateOnAxis(GESMO.Z_AXIS, -Math.PI/4);
+ 		this.airplane.mesh.rotateOnAxis(GESMO.Y_AXIS, -Math.PI/4);
 
 		var newEvent = new CustomEvent('gesmo.ui.setupcomplete');
 		window.dispatchEvent(newEvent);
@@ -205,10 +234,12 @@ GESMO.GesmoUI.prototype = {
  		}
 
  		this.viewMode = GESMO.HOMEVIEW;
+ 		this.isFetchingData = false;
  		
  	},
 
  	fetchLibrary: function(searchQuery){
+ 		this.isFetchingData = true;
  		if(this.libElements.length > 0){
  			this.destroyLibrary(this.sendQuery.bind(this), searchQuery);
  		}
@@ -276,7 +307,7 @@ GESMO.GesmoUI.prototype = {
  			this.viewMode = GESMO.SONGSVIEW;
  		} 
 
- 		if(type == "queue"){
+ 		if(type == "queueitem"){
  			this.viewMode = GESMO.QUEUEVIEW;
  		}
 
@@ -297,7 +328,7 @@ GESMO.GesmoUI.prototype = {
 
 			this.addLabels(itemMesh, 4);
 
-			if(type == "queue"){
+			if(type == "queueitem"){
 	 			itemMesh.position.set(this.slotO.position.x, this.slotO.position.y, this.slotO.position.z);
 	 		}
 
@@ -373,8 +404,8 @@ GESMO.GesmoUI.prototype = {
 						var itemMesh = new THREE.Mesh(itemGeom, itemMat);
 
 						itemMesh.position.y = j*80;
-						itemMesh.position.x = 500 * Math.sin( theta );
-						itemMesh.position.z = 500 * Math.cos( theta );
+						itemMesh.position.x = 700 * Math.sin( theta );
+						itemMesh.position.z = 700 * Math.cos( theta );
 						//itemMesh.position.set(70, 1, 0);
 
 						vector.y = j*80;
@@ -411,8 +442,8 @@ GESMO.GesmoUI.prototype = {
 						var itemMesh = new THREE.Mesh(itemGeom, itemMat);
 
 						itemMesh.position.y = j*80;
-						itemMesh.position.x = k*500 * Math.sin( theta);
-						itemMesh.position.z = k*500 * Math.cos( theta);
+						itemMesh.position.x = k*600 * Math.sin( theta);
+						itemMesh.position.z = k*600 * Math.cos( theta);
 						vector.y = j*80;
 						vector.x = 0;
 						vector.z = 0;
@@ -446,11 +477,14 @@ GESMO.GesmoUI.prototype = {
 							var itemMat = new THREE.MeshNormalMaterial();
 							var itemMesh = new THREE.Mesh(itemGeom, itemMat);
 
-							itemMesh.position.x = -300 + k*80;
-							itemMesh.position.y = 500 * Math.sin( theta ) + 60;
-							itemMesh.position.z = 500 * Math.cos( theta );
+							itemMesh.position.x = 700;
+							itemMesh.position.y = j*100;
+							itemMesh.position.z = -300 + k*80;
+							//itemMesh.position.z = 700 * Math.cos( theta );
 
-							vector.copy( itemMesh.position );
+							vector.x = 0;
+							vector.y = j*100;
+							vector.z = -300+k+80;
 
 							itemMesh.lookAt( vector );
 							this.targets.push( itemMesh );
@@ -461,7 +495,7 @@ GESMO.GesmoUI.prototype = {
 				break;
 			}
 
-			case "queue":{
+			case "queueitem":{
 
 
 				for ( var i = -this.curSongIndex, l = this.libElements.length - this.curSongIndex; i < l; i++ ) {
@@ -470,7 +504,7 @@ GESMO.GesmoUI.prototype = {
 					var itemMat = new THREE.MeshNormalMaterial();
 					var itemMesh = new THREE.Mesh(itemGeom, itemMat);
 
-					itemMesh.position.x = 50*i*i + 250;
+					itemMesh.position.x = 50*i*i + 500;
 					itemMesh.position.z = 2*i*50;
 
 					vector.copy( itemMesh.position );
@@ -513,18 +547,22 @@ GESMO.GesmoUI.prototype = {
 		new TWEEN.Tween( this )
 			.to( {}, duration * 2 )
 			.onUpdate( this.render )
+			.onComplete(function(){
+				console.log('completed');
+				this.isFetchingData = false;
+			}.bind(this))
 			.start();
 
 
 		return this;
 	},
 
- 	// onWindowResize: function(){
- 	// 	this.camera.aspect = window.innerWidth/window.innerHeight;
- 	// 	this.camera.updateProjectionMatrix();
+ 	onWindowResize: function(){
+ 		this.camera.aspect = window.innerWidth/window.innerHeight;
+ 		this.camera.updateProjectionMatrix();
 
- 	// 	this.renderer.setSize(window.innerWidth, window.innerHeight);
- 	// },
+ 		this.renderer.setSize(window.innerWidth, window.innerHeight);
+ 	},
 
  	// for mouse interaction----------------------------------------------------------------------------------
 
@@ -646,7 +684,7 @@ GESMO.GesmoUI.prototype = {
  	},
 
  	onClick: function(event){
- 		if(event.button == 0 && this.highlighted != null){
+ 		if(event.button == 0 && this.highlighted != null && this.isFetchingData == false){
 			var selectedType = this.highlighted.userData.type;
 			var searchQuery = {
 					filterName: null,
@@ -690,6 +728,7 @@ GESMO.GesmoUI.prototype = {
 					break;
 				}
 				case "queue" : {
+					console.log('queue');
 					searchQuery.type = "queue";
 					this.fetchLibrary(searchQuery);
 					break;
@@ -755,13 +794,15 @@ GESMO.GesmoUI.prototype = {
  		//requestAnimationFrame(this.animate);
  		var delta = this.clock.getDelta();
  		//this.trackballControls.update(delta);
- 		//this.water.moveWaves();
+ 		//this.spaceDebris.movedust();
+ 		if(this.airplane){
+ 			this.airplane.updatePlane();
+ 		}
  		TWEEN.update();
  		this.render();
  	},
 
  	render: function(){
- 		this.cssRenderer.render( this.cssScene, this.camera);
  		this.renderer.render( this.scene, this.camera );
  	},
 
@@ -775,6 +816,7 @@ GESMO.GesmoUI.prototype = {
 	},
 
 	queueSong: function(item){
+		this.isFetchingData = true;
 		var copy = item.clone();
 		copy.position.copy(item.position);
 		copy.rotation.copy(item.rotation);
@@ -804,6 +846,7 @@ GESMO.GesmoUI.prototype = {
 							}
 						});
 
+						this.isFetchingData = false;
 						window.dispatchEvent(newEvent);
 					}.bind(this))
 				.start();
@@ -879,7 +922,11 @@ GESMO.GesmoUI.prototype = {
 	},
 
 	fetchAllPickables: function(){
-		var objectsArray = this.airplane.buttons.slice();
+		var objectsArray = [];
+		if(this.airplane){
+			 objectsArray = this.airplane.buttons.slice();
+		}
+		var objectsArray = objectsArray.concat(this.buttons);
 		for(var i = 0;i < this.libElements.length;i++){
 			objectsArray.push(this.libElements[i]);
 		}
@@ -888,34 +935,58 @@ GESMO.GesmoUI.prototype = {
 	},
 
 	checkIntersection: function(point){
-		var dist = 5;
 		var objects = this.fetchAllPickables();
-		var collisions = [];
-		for(var i = 0;i < this.rays.length;i++){
-			this.raycaster.set(point, this.rays[i]);
-			collisions = collisions.concat(this.raycaster.intersectObjects(objects));
-		}
-
-		if(collisions.length > 0){
-			collisions.sort(function(a, b){
-				return a.distance - b.distance;
-			});
-
-			if(collisions[0].distance <= 50){
-				return collisions[0].object;
-			} else {
-				return null;
+		for(var i = 0;i < objects.length;i++){
+			var box3 = new THREE.Box3().setFromObject(objects[i]);
+			if(point.x >= box3.min.x - 10 && point.y >= box3.min.y - 20 && point.z >= box3.min.z - 20 
+				&& point.x <= box3.max.x + 10 && point.y <= box3.max.y + 20 && point.z <= box3.max.z + 20){
+					return objects[i];
 			}
-		} else {
-			return null;
 		}
+
+		return null;
 	},
 
 	onSongChange: function(index){
 		this.curSongIndex = index;
 		if(this.viewMode == GESMO.QUEUEVIEW){
-			this.assignTargets("queue");
+			this.assignTargets("queueitem");
 			this.transform(this.targets, 2000);
 		}
+	},
+
+	startDescent: function(){
+		this.airplane.startAirplane();
+		setTimeout(function() {
+			var dTween1 = new TWEEN.Tween(this.airplane.mesh.position)
+				.to({x: -3114, y: 500, z: -3888}, 10000)
+				.easing(TWEEN.Easing.Quadratic.In);
+
+			var dTween2 = new TWEEN.Tween(this.airplane.mesh.position)
+				.to({x: 0, y: 0, z: 0}, 10000)
+				.easing(TWEEN.Easing.Quadratic.Out)
+				.onComplete(function(){
+					this.airplane.stopAirplane();
+					var event = new CustomEvent('gesmo.ui.startcomplete');
+					window.dispatchEvent(event);
+				}.bind(this));
+
+			dTween1.chain(dTween2);
+				
+			dTween1.start();
+
+			var rTween1 = new TWEEN.Tween(this.airplane.mesh.rotation)
+				.to({x: this.initPlaneRot.x, y: this.initPlaneRot.y - Math.PI/3, z: this.initPlaneRot.z }, 10000)
+				.easing(TWEEN.Easing.Quadratic.In);
+
+			var rTween2 = new TWEEN.Tween(this.airplane.mesh.rotation)
+				.to({x: this.initPlaneRot.x, y: this.initPlaneRot.y, z: this.initPlaneRot.z }, 10000)
+				.easing(TWEEN.Easing.Quadratic.Out);
+
+			rTween1.chain(rTween2);
+
+			rTween1.start();
+
+		}.bind(this), 800);
 	}
 };
