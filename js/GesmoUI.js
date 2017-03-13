@@ -18,10 +18,10 @@
  	farPlane = 100000;
  	this.camera = new THREE.PerspectiveCamera(fieldOfView, aspectratio,
  												nearPlane, farPlane);
- 	this.camera.position.x = 3;
+ 	this.camera.position.x = 0;
  	this.camera.position.z = 0;//7500; 
- 	this.camera.position.y = 0;//600; 
- 	this.camera.lookAt(new THREE.Vector3(0,0,0));
+ 	this.camera.position.y = 60;//600; 
+ 	//this.camera.lookAt(new THREE.Vector3(0,0,0));
 
  	// Create the renderer
  	this.renderer = new THREE.WebGLRenderer( { alpha: 1, antialias: true, clearColor: 0x000000 });
@@ -57,28 +57,28 @@
 
  	// Create the scene
  	// Create the Island
- 	this.island = new GESMO.Island(3500, 500, 3000);
- 	this.movableObjects.add(this.island.mesh);
- 	this.island.mesh.position.y = -1725;
+ 	// this.island = new GESMO.Island(3500, 500, 3000);
+ 	// this.movableObjects.add(this.island.mesh);
+ 	// this.island.mesh.position.y = -1725;
 
- 	this.grass = new GESMO.GrassyTerrain(3500);
- 	this.grass.mesh.position.y = 1540;
- 	this.island.mesh.add(this.grass.mesh);
+ 	// this.grass = new GESMO.GrassyTerrain(3500);
+ 	// this.grass.mesh.position.y = 1540;
+ 	// this.island.mesh.add(this.grass.mesh);
 
- 	this.mountains = new GESMO.Mountains();
- 	this.movableObjects.add(this.mountains.mesh);
- 	this.mountains.mesh.rotateY(-3*Math.PI/4);
- 	this.mountains.mesh.position.y = 1500;
+ 	// this.mountains = new GESMO.Mountains();
+ 	// this.movableObjects.add(this.mountains.mesh);
+ 	// this.mountains.mesh.rotateY(-3*Math.PI/4);
+ 	// this.mountains.mesh.position.y = 1500;
  	
- 	this.forest1 = new GESMO.Forest(2000, -Math.PI/3, Math.PI/4, 12);
- 	this.movableObjects.add(this.forest1.mesh);
+ 	// this.forest1 = new GESMO.Forest(2000, -Math.PI/3, Math.PI/4, 12);
+ 	// this.movableObjects.add(this.forest1.mesh);
 
- 	this.forest2 = new GESMO.Forest(500, Math.PI/2, 5*Math.PI/4, 10);
- 	this.movableObjects.add(this.forest2.mesh);
- 	this.forest2.mesh.translateX(-400);
+ 	// this.forest2 = new GESMO.Forest(500, Math.PI/2, 5*Math.PI/4, 10);
+ 	// this.movableObjects.add(this.forest2.mesh);
+ 	// this.forest2.mesh.translateX(-400);
 
- 	this.clouds = new GESMO.Clouds(7);
- 	this.movableObjects.add(this.clouds.mesh);
+ 	// this.clouds = new GESMO.Clouds(7);
+ 	// this.movableObjects.add(this.clouds.mesh);
 
  	this.spaceDebris = new GESMO.SpaceDebris(this.movableObjects);
 
@@ -176,21 +176,21 @@
 	 	this.buttons.push(btn2);
 	 	this.musicBox.add(btn2);
 
-	 	this.airplane = new GESMO.Airplane(this.titleFont);
+	 	//this.airplane = new GESMO.Airplane(this.titleFont);
  		//this.airplane.mesh.scale.set(0.25, 0.25, 0.25);
- 		this.scene.add(this.airplane.mesh);
+ 		//this.scene.add(this.airplane.mesh);
 
- 		this.pilot = new GESMO.Pilot();
- 		this.pilot.mesh.position.set(2, 27, 0);
- 		this.airplane.mesh.add(this.pilot.mesh);
+ 		// this.pilot = new GESMO.Pilot();
+ 		// this.pilot.mesh.position.set(2, 27, 0);
+ 		// this.airplane.mesh.add(this.pilot.mesh);
 
- 		this.pilot.camPoint.add(this.camera);
- 		this.camera.lookAt(this.airplane.propeller.position);
+ 		// this.pilot.camPoint.add(this.camera);
+ 		// this.camera.lookAt(this.airplane.propeller.position);
 
- 		this.airplane.mesh.position.set(-20000, 20000, -20000);
- 		this.initPlaneRot = this.airplane.mesh.rotation.clone();
- 		this.airplane.mesh.rotateOnAxis(GESMO.Z_AXIS, -Math.PI/4);
- 		this.airplane.mesh.rotateOnAxis(GESMO.Y_AXIS, -Math.PI/4);
+ 		// this.airplane.mesh.position.set(-20000, 20000, -20000);
+ 		// this.initPlaneRot = this.airplane.mesh.rotation.clone();
+ 		// this.airplane.mesh.rotateOnAxis(GESMO.Z_AXIS, -Math.PI/4);
+ 		// this.airplane.mesh.rotateOnAxis(GESMO.Y_AXIS, -Math.PI/4);
 
 		var newEvent = new CustomEvent('gesmo.ui.setupcomplete');
 		window.dispatchEvent(newEvent);
@@ -265,6 +265,9 @@ GESMO.GesmoUI.prototype = {
  				libMesh.remove(flabel);
  				var llabel = libMesh.getObjectByName("llabel");
  				libMesh.remove(llabel);
+
+ 				var image = libMesh.getObjectByName("image_plane");
+ 				libMesh.remove(image);
  				
  				var targetPos = libMesh.userData.position;
  				var targetRot = libMesh.userData.rotation;
@@ -327,6 +330,11 @@ GESMO.GesmoUI.prototype = {
 	 		itemMesh.userData.scale = itemMesh.scale.clone();
 
 			this.addLabels(itemMesh, 4);
+
+			if(type == "artists"){
+				console.log(data[i].image);
+				this.addImage(itemMesh);
+			}
 
 			if(type == "queueitem"){
 	 			itemMesh.position.set(this.slotO.position.x, this.slotO.position.y, this.slotO.position.z);
@@ -391,6 +399,20 @@ GESMO.GesmoUI.prototype = {
 		}
 	},
 
+	addImage: function (mesh) {
+		var imagePath = "http://localhost/GESMO/testData/" + mesh.userData.image;
+		var img = new THREE.MeshBasicMaterial({
+			map:THREE.ImageUtils.loadTexture(imagePath)
+		});
+		img.map.needsUpdate = true;
+
+		var plane = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), img);
+		plane.overdraw = true;
+		plane.name = "image_plane";
+		mesh.add(plane);
+		plane.translateZ(5);
+	},
+
 	assignTargets: function(type){
 		this.targets.length = 0;
 		var vector = new THREE.Vector3();
@@ -403,26 +425,26 @@ GESMO.GesmoUI.prototype = {
 						var itemMat = new THREE.MeshNormalMaterial();
 						var itemMesh = new THREE.Mesh(itemGeom, itemMat);
 
-						itemMesh.position.y = j*80;
-						itemMesh.position.x = 700 * Math.sin( theta );
-						itemMesh.position.z = 700 * Math.cos( theta );
+						itemMesh.position.y = j*70;
+						itemMesh.position.x = 500 * Math.sin( theta );
+						itemMesh.position.z = 500 * Math.cos( theta );
 						//itemMesh.position.set(70, 1, 0);
 
-						vector.y = j*80;
+						vector.y = j*70;
 						vector.x = 0;
 						vector.z = 0;
 
 						itemMesh.lookAt( vector );
 						this.targets.push( itemMesh );
 
-						if(i+j+1 < this.libElements.length){
-							var eleName = this.libElements[i+j+1].userData.name.toUpperCase();
-							if(eleName.charAt(0) != curChar){
-								curChar = eleName.charAt(0);
-								i = i+j+1 - 3;
-								break;	
-							}
-						}
+						// if(i+j+1 < this.libElements.length){
+						// 	var eleName = this.libElements[i+j+1].userData.name.toUpperCase();
+						// 	if(eleName.charAt(0) != curChar){
+						// 		curChar = eleName.charAt(0);
+						// 		i = i+j+1 - 3;
+						// 		break;	
+						// 	}
+						// }
 					}
 				}
 				break;
@@ -953,40 +975,40 @@ GESMO.GesmoUI.prototype = {
 			this.assignTargets("queueitem");
 			this.transform(this.targets, 2000);
 		}
-	},
-
-	startDescent: function(){
-		this.airplane.startAirplane();
-		setTimeout(function() {
-			var dTween1 = new TWEEN.Tween(this.airplane.mesh.position)
-				.to({x: -3114, y: 500, z: -3888}, 10000)
-				.easing(TWEEN.Easing.Quadratic.In);
-
-			var dTween2 = new TWEEN.Tween(this.airplane.mesh.position)
-				.to({x: 0, y: 0, z: 0}, 10000)
-				.easing(TWEEN.Easing.Quadratic.Out)
-				.onComplete(function(){
-					this.airplane.stopAirplane();
-					var event = new CustomEvent('gesmo.ui.startcomplete');
-					window.dispatchEvent(event);
-				}.bind(this));
-
-			dTween1.chain(dTween2);
-				
-			dTween1.start();
-
-			var rTween1 = new TWEEN.Tween(this.airplane.mesh.rotation)
-				.to({x: this.initPlaneRot.x, y: this.initPlaneRot.y - Math.PI/3, z: this.initPlaneRot.z }, 10000)
-				.easing(TWEEN.Easing.Quadratic.In);
-
-			var rTween2 = new TWEEN.Tween(this.airplane.mesh.rotation)
-				.to({x: this.initPlaneRot.x, y: this.initPlaneRot.y, z: this.initPlaneRot.z }, 10000)
-				.easing(TWEEN.Easing.Quadratic.Out);
-
-			rTween1.chain(rTween2);
-
-			rTween1.start();
-
-		}.bind(this), 800);
 	}
+
+	// startDescent: function(){
+	// 	this.airplane.startAirplane();
+	// 	setTimeout(function() {
+	// 		var dTween1 = new TWEEN.Tween(this.airplane.mesh.position)
+	// 			.to({x: -3114, y: 500, z: -3888}, 10000)
+	// 			.easing(TWEEN.Easing.Quadratic.In);
+
+	// 		var dTween2 = new TWEEN.Tween(this.airplane.mesh.position)
+	// 			.to({x: 0, y: 0, z: 0}, 10000)
+	// 			.easing(TWEEN.Easing.Quadratic.Out)
+	// 			.onComplete(function(){
+	// 				this.airplane.stopAirplane();
+	// 				var event = new CustomEvent('gesmo.ui.startcomplete');
+	// 				window.dispatchEvent(event);
+	// 			}.bind(this));
+
+	// 		dTween1.chain(dTween2);
+				
+	// 		dTween1.start();
+
+	// 		var rTween1 = new TWEEN.Tween(this.airplane.mesh.rotation)
+	// 			.to({x: this.initPlaneRot.x, y: this.initPlaneRot.y - Math.PI/3, z: this.initPlaneRot.z }, 10000)
+	// 			.easing(TWEEN.Easing.Quadratic.In);
+
+	// 		var rTween2 = new TWEEN.Tween(this.airplane.mesh.rotation)
+	// 			.to({x: this.initPlaneRot.x, y: this.initPlaneRot.y, z: this.initPlaneRot.z }, 10000)
+	// 			.easing(TWEEN.Easing.Quadratic.Out);
+
+	// 		rTween1.chain(rTween2);
+
+	// 		rTween1.start();
+
+	// 	}.bind(this), 800);
+	// }
 };

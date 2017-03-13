@@ -9,32 +9,32 @@ window.onload = function(){
 	ui = new GESMO.GesmoUI();
 	dataController = new GESMO.DataController();
 	player = new GESMO.GesmoPlayer([]);
-	leapController = new Leap.Controller({ enableGestures: true })
-		.use('transform', {
-			position: new THREE.Vector3(0, -200, -150),
-			effectiveParent: ui.camera
-		})
-		.use('riggedHand', {
-			parent: ui.scene,
-			renderer: ui.renderer,
-			camera: ui.camera,
-			materialOptions: {
-		      wireframe: false,
-		      color: new THREE.Color(0xcccccc)
-		    },
-		    scale: 0.1,
-			renderFn: function(){
-				gestureController.update();
-				ui.animate();
-			}
-		}).connect();
+	// leapController = new Leap.Controller({ enableGestures: true })
+	// 	.use('transform', {
+	// 		position: new THREE.Vector3(0, -200, -150),
+	// 		effectiveParent: ui.camera
+	// 	})
+	// 	.use('riggedHand', {
+	// 		parent: ui.scene,
+	// 		renderer: ui.renderer,
+	// 		camera: ui.camera,
+	// 		materialOptions: {
+	// 	      wireframe: false,
+	// 	      color: new THREE.Color(0xcccccc)
+	// 	    },
+	// 	    scale: 0.1,
+	// 		renderFn: function(){
+	// 			gestureController.update();
+	// 			ui.animate();
+	// 		}
+	// 	}).connect();
 
 
-	gestureController = new GESMO.GestureController(leapController, ui, player);
+	//gestureController = new GESMO.GestureController(leapController, ui, player);
 
-	leapController.on('ready', function () {  
-		showMessage("Please connect device and perform a grab gesture with both hands to begin.");
-	});
+	// leapController.on('ready', function () {  
+	// 	showMessage("Please connect device and perform a grab gesture with both hands to begin.");
+	// });
 
 	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
 		switch(event.detail.query.type){
@@ -77,9 +77,9 @@ window.onload = function(){
 		ui.createHome();
 	}.bind(this));
 
-	window.addEventListener('gesmo.ui.startcomplete', function(){
-		gestureController.setStartGesture();
-	}.bind(this));
+	// window.addEventListener('gesmo.ui.startcomplete', function(){
+	// 	gestureController.setStartGesture();
+	// }.bind(this));
 
 	window.addEventListener('resize', function(event){
 		ui.onWindowResize();
@@ -121,11 +121,11 @@ window.onload = function(){
 		ui.onSongChange(event.detail.index);
 	}.bind(this));
 
-	window.addEventListener('gesmo.gesture.startdectected', function(event){
-		openGates();
-	}.bind(this));
+	// window.addEventListener('gesmo.gesture.startdectected', function(event){
+	// 	openGates();
+	// }.bind(this));
 
-	//loop();
+	loop();
 
 	// setTimeout(function() {
 	// 	openGates();
@@ -143,7 +143,8 @@ function dataFetched(type, data){
 	data.forEach(function(item){
 		dataList.push({
 			name: item.name,
-			id: item.id
+			id: item.id,
+			image: item.image
 		});
 		loadedData.push(item);
 	}.bind(this));
@@ -186,16 +187,16 @@ function sendQueueToUI(){
 	ui.showLibrary("queueitem", dataList);
 }
 
-function openGates(){
-	var leftCurtainWid = $('#leftCurtain').width() + 5;
-	var rightCurtainWid = $('#rightCurtain').width() + 5;
-	var messageBrdHt = $('#messageboard').height() + 10;
-	$('#leftCurtain').animate({left: '-=' + leftCurtainWid+'px'}, 2000);
-	$('#rightCurtain').animate({right: '-=' + rightCurtainWid+'px'}, 2000);
-	$('#messageboard').animate({top: '-=' + messageBrdHt + 'px'}, 2000, function(){
-		ui.startDescent();
-	}.bind(this));
-}
+// function openGates(){
+// 	var leftCurtainWid = $('#leftCurtain').width() + 5;
+// 	var rightCurtainWid = $('#rightCurtain').width() + 5;
+// 	var messageBrdHt = $('#messageboard').height() + 10;
+// 	$('#leftCurtain').animate({left: '-=' + leftCurtainWid+'px'}, 2000);
+// 	$('#rightCurtain').animate({right: '-=' + rightCurtainWid+'px'}, 2000);
+// 	$('#messageboard').animate({top: '-=' + messageBrdHt + 'px'}, 2000, function(){
+// 		ui.startDescent();
+// 	}.bind(this));
+// }
 
 function showMessage(msg){
 	$('#messageboard').empty();
