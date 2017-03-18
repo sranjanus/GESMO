@@ -9,6 +9,8 @@
  */
 
 // Cache references to DOM elements.
+
+
 var elms = ['track', 'timer', 'duration', 'playBtn', 
 'pauseBtn', 'prevBtn', 'nextBtn', 'volumeBtn', 'progress', 'bar', 'wave', 
 'loading', 'playlist', 'list', 'volume', 'barEmpty', 'barFull', 'sliderBtn'];
@@ -21,6 +23,7 @@ elms.forEach(function(elm) {
  * Includes all methods for playing, skipping, updating the display, etc.
  * @param {Array} playlist Array of objects with playlist song details ({title, file, howl}).
  */
+ 
 var Player = function(playlist) {
   this.playlist = playlist;
   this.index = 0;
@@ -302,25 +305,39 @@ var player = new Player(my_songs);
 // Bind our player controls.
 playBtn.addEventListener('click', function() {
   player.play();
+  play='play';
+  body='name of the song';
+  notifyMe(play,body);
 });
 pauseBtn.addEventListener('click', function() {
   player.pause();
+  pause='pause';
+  body=' ';
+  notifyMe(pause,body);
 });
 prevBtn.addEventListener('click', function() {
   player.skip('prev');
+  prev='previous';
+  body='name of the song';
+  notifyMe(prev,body);
 });
 nextBtn.addEventListener('click', function() {
   player.skip('next');
+  next='next';
+  body='name of the song';
+  notifyMe(next,body);
 });
 waveform.addEventListener('click', function(event) {
   player.seek(event.clientX / window.innerWidth);
 });
-//playlistBtn.addEventListener('click', function() {
+playlistBtn.addEventListener('click', function() {
   //player.togglePlaylist();
-//});
-//playlist.addEventListener('click', function() {
- // player.togglePlaylist();
-//});
+  change_page();
+});
+playlist.addEventListener('click', function() {
+ //player.togglePlaylist();
+ change_page();
+});
 volumeBtn.addEventListener('click', function() {
   player.toggleVolume();
 });
@@ -396,3 +413,40 @@ var resize = function() {
 };
 window.addEventListener('resize', resize);
 resize();
+
+function change_page(){
+  window.location.href = "test.html";
+} 
+
+
+//<input type="button" value="create page" onclick="change_page()"/>
+// request permission on page load
+document.addEventListener('DOMContentLoaded', function () {
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+});
+
+function notifyMe(name , message) {
+    //name='name';
+   // message='message';
+  if (!Notification) {
+    alert('Desktop notifications not available in your browser. Try Chromium.'); 
+    return;
+  }
+
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+  else {
+    
+    var notification = new Notification(name, {
+      icon: 'calculator-128.png',
+      body: message,
+    });
+
+    notification.onclick = function () {
+      window.open("http://stackoverflow.com/a/13328397/1269037");      
+    };
+    
+  }
+
+}
