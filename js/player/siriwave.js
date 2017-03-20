@@ -34,6 +34,7 @@ function SiriWave(opt) {
     parseInt(result[1],16).toString()+','+parseInt(result[2], 16).toString()+','+parseInt(result[3], 16).toString()
     : null;
   })(opt.color || '#000') || '255,255,255';
+  this.changeColor();
 
   // Canvas
 
@@ -51,6 +52,7 @@ function SiriWave(opt) {
   this.container.appendChild(this.canvas);
 
   this.ctx = this.canvas.getContext('2d');
+  this.ctx.globalAlpha = 0.2;
 
   // Start
 
@@ -137,6 +139,28 @@ SiriWave.prototype.setSpeed = function(v) {
 SiriWave.prototype.setNoise = SiriWave.prototype.setAmplitude = function(v) {
   this.amplitude = Math.max(Math.min(v, 1), 0);
 };
+
+SiriWave.prototype.changeColor = function(){
+  this.color = (function hex2rgb(hex){
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m,r,g,b) { return r + r + g + g + b + b; });
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ?
+    parseInt(result[1],16).toString()+','+parseInt(result[2], 16).toString()+','+parseInt(result[3], 16).toString()
+    : null;
+  })(this.getRandomColor() || '#000') || '255,255,255';
+
+  setTimeout(this.changeColor.bind(this), 20000);
+}
+
+SiriWave.prototype.getRandomColor = function(){
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 3; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 
 if (typeof define === 'function' && define.amd) {

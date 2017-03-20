@@ -1,69 +1,75 @@
 var windowMode =  GESMO.MaxMode;
-var ui, leapController, dataController, player, leapController, gestureController;
+var ui, leapController, dataController, player, leapController, gestureController, logger;
 
 var queue = [];
 var loadedData = [];
 var searchQueries = [];
+var mapSections = [];
 
 window.onload = function(){
-	ui = new GESMO.GesmoUI();
-	dataController = new GESMO.DataController();
-	player = new GESMO.GesmoPlayer([]);
-	// leapController = new Leap.Controller({ enableGestures: true })
-	// 	.use('transform', {
-	// 		position: new THREE.Vector3(0, -200, -150),
-	// 		effectiveParent: ui.camera
-	// 	})
-	// 	.use('riggedHand', {
-	// 		parent: ui.scene,
-	// 		renderer: ui.renderer,
-	// 		camera: ui.camera,
-	// 		materialOptions: {
-	// 	      wireframe: false,
-	// 	      color: new THREE.Color(0xcccccc)
-	// 	    },
-	// 	    scale: 0.1,
-	// 		renderFn: function(){
-	// 			gestureController.update();
-	// 			ui.animate();
-	// 		}
-	// 	}).connect();
+	var secs = $("#userMap").find('.box');
+	mapSections.push(secs[2]);
+	mapSections.push(secs[3]);
+	mapSections.push(secs[1]);
+	mapSections.push(secs[0])
+
+	var tutLinks = $("#tuts").find('.box');
+	tutLinks.each(function(index){
+		var id = $(this).attr("id");
+		$(this).click(function(){
+			var win = window.open("http://localhost/Gesmo/tutorial.html#" + id, '_blank');
+  			win.focus();
+		});
+	});
+
+	logger = new GESMO.Logger();
+	logger.createServerFile();
+	ui = new GESMO.GesmoUI(logger);
+	dataController = new GESMO.DataController(logger);
+	player = new GESMO.GesmoPlayer([], logger);
+	leapController = new Leap.Controller({ enableGestures: true })
+		.use('transform', {
+			position: new THREE.Vector3(0, -200, -150),
+			effectiveParent: ui.camera
+		})
+		.use('riggedHand', {
+			parent: ui.scene,
+			renderer: ui.renderer,
+			camera: ui.camera,
+			materialOptions: {
+		      wireframe: false,
+		      color: new THREE.Color(0xcccccc)
+		    },
+		    positionScale: 2,
+			renderFn: function(){
+				gestureController.update();
+				ui.animate();
+			}
+		}).connect();
 
 
-	//gestureController = new GESMO.GestureController(leapController, ui, player);
-
-	// leapController.on('ready', function () {  
-	// 	showMessage("Please connect device and perform a grab gesture with both hands to begin.");
-	// });
+	gestureController = new GESMO.GestureController(leapController, ui, player, logger);
 
 	window.addEventListener('gesmo.ui.fetchlibrary', function(event){
+		var secno = event.detail.viewno;
 		switch(event.detail.query.type){
 			case "queue" : {
 					sendQueueToUI();
-					searchQueries.push(event.detail.query);
 				break;
 			}
 
 			case "back" : {
-					searchQueries.pop();
-					console.log(searchQueries);
-					if(searchQueries.length == 0){
-						ui.createHome();
-					} else {
-						dataController.fetchData(searchQueries[searchQueries.length - 1], dataFetched, dataFetchFailed);
+					if(searchQueries[secno].length > 1){
+						searchQueries[secno].pop();
 					}
+					
+					dataController.fetchData(searchQueries[secno][searchQueries[secno].length - 1], dataFetched, dataFetchFailed);
 				break;
-			}
-
-			case "home" : {
-					searchQueries.length = 0;
-					ui.createHome();
-					break;
 			}
 
 			default: {
 				dataController.fetchData(event.detail.query, dataFetched, dataFetchFailed);
-				searchQueries.push(event.detail.query);
+				searchQueries[secno].push(event.detail.query);
 			}
 		}
 		
@@ -73,13 +79,21 @@ window.onload = function(){
 		addToQueue(event.detail.type, event.detail.id);
 	}.bind(this));
 
-	window.addEventListener('gesmo.ui.setupcomplete', function(){
-		ui.createHome();
+	window.addEventListener('gesmo.ui.removefromq', function(event){
+		removeFromQueue(event.detail.index);
 	}.bind(this));
 
-	// window.addEventListener('gesmo.ui.startcomplete', function(){
-	// 	gestureController.setStartGesture();
-	// }.bind(this));
+	window.addEventListener('gesmo.ui.setupcomplete', function(event){
+		var nos = event.detail.nosections;
+		for(var i = 0;i < nos;i++){
+			searchQueries.push([]);
+		}
+		ui.start();
+	}.bind(this));
+
+	window.addEventListener('gesmo.ui.startcomplete', function(){
+		//gestureController.setStartGesture();
+	}.bind(this));
 
 	window.addEventListener('resize', function(event){
 		ui.onWindowResize();
@@ -99,6 +113,10 @@ window.onload = function(){
 
 	document.addEventListener('click', function(event) {
 		ui.onClick(event);
+	}.bind(this), false);
+
+	document.addEventListener('keypress', function(event){
+		ui.onKeyPress(event);
 	}.bind(this), false);
 
 	window.addEventListener('gesmo.actions.play', function(event){
@@ -121,16 +139,25 @@ window.onload = function(){
 		ui.onSongChange(event.detail.index);
 	}.bind(this));
 
-	// window.addEventListener('gesmo.gesture.startdectected', function(event){
-	// 	openGates();
-	// }.bind(this));
+	window.addEventListener('gesmo.player.songremoved', function(event){
+		ui.onSongRemove(event.detail.index);
+	});
 
-	loop();
+	window.addEventListener('gesmo.gesture.startdectected', function(event){
+		$("#playerContainer").fadeIn("slow");
+		$("#userMap").fadeIn("slow");
+		ui.createHome();
+	}.bind(this));
 
-	// setTimeout(function() {
-	// 	openGates();
-	// }.bind(this), 100);
-};
+	window.addEventListener('gesmo.ui.setusermap', function(event){
+		mapSections.forEach(function(sec){
+			$(sec).css({ border: "2px solid rgba(33, 148, 206, 0.25)",
+						  background: "transparent" });
+		}.bind(this));
+		$(mapSections[ui.viewMode]).css({ border: "2px solid rgba(33, 148, 206, 1)",
+											background: "rgba(33, 148, 206, 0.25)"});
+	}.bind(this));
+}
 
 function loop(){
 	requestAnimationFrame(loop);
@@ -138,6 +165,9 @@ function loop(){
 }
 
 function dataFetched(type, data){
+	if(!gestureController.startGesture){
+		gestureController.startGesture = true;
+	}
 	var dataList = [];
 	loadedData.length = 0;
 	data.forEach(function(item){
@@ -167,6 +197,10 @@ function addToQueue(type, id){
 	}
 }
 
+function removeFromQueue(index){
+	this.player.removeFromPlaylist(index); 
+}
+
 function findObjectByKey(arr, key, value){
 	for(var i = 0;i < arr.length;i++){
 		if(arr[i][key] == value){
@@ -185,20 +219,4 @@ function sendQueueToUI(){
 		});
 	}.bind(this));
 	ui.showLibrary("queueitem", dataList);
-}
-
-// function openGates(){
-// 	var leftCurtainWid = $('#leftCurtain').width() + 5;
-// 	var rightCurtainWid = $('#rightCurtain').width() + 5;
-// 	var messageBrdHt = $('#messageboard').height() + 10;
-// 	$('#leftCurtain').animate({left: '-=' + leftCurtainWid+'px'}, 2000);
-// 	$('#rightCurtain').animate({right: '-=' + rightCurtainWid+'px'}, 2000);
-// 	$('#messageboard').animate({top: '-=' + messageBrdHt + 'px'}, 2000, function(){
-// 		ui.startDescent();
-// 	}.bind(this));
-// }
-
-function showMessage(msg){
-	$('#messageboard').empty();
-	$('<p>').append(msg).appendTo($('#messageboard'));
 }

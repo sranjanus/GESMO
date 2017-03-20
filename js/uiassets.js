@@ -14,7 +14,6 @@ GESMO.Island = function(topRadius, botRadius, height) {
 	geom.vertices[12].x -= 1057;
 	geom.vertices[12].z -= 1057;
 	geom.vertices[12].y += 500;
-	console.log(geom.vertices[12]);
 	
 	var mat = new THREE.MeshLambertMaterial({
 		color: 0x23190f,
@@ -612,7 +611,7 @@ GESMO.Pilot =function(){
  	var stepAngle = Math.PI/nClouds*2;
  	this.clouds = [];
 
-	var geom = new THREE.BoxGeometry(60, 60, 5);
+	var geom = new THREE.BoxGeometry(70, 70, 20);
 
  	for (var j = 0;j < nClouds;j++){
  		var b = stepAngle*j;
@@ -623,7 +622,9 @@ GESMO.Pilot =function(){
 	 		for(var k = 0;k < 3;k++){
 	 			var mat = new THREE.MeshPhongMaterial({
 						color: Math.random() * 0xffffff - 0x110000,
-						shading: THREE.FlatShading
+						shading: THREE.FlatShading,
+						transparent: true,
+						opacity: 1
 				});
 			 	var m = new THREE.Mesh(geom.clone(), mat);
 			 	var s = 0.1 + Math.random()*0.4;

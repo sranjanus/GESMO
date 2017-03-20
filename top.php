@@ -1,15 +1,16 @@
 <?php
 include_once 'dbconfig.php';
 
-$Key="EDM";
-$sql = "SELECT * FROM tbl_uploads WHERE Genre='$Key' ORDER BY id desc limit 2";
+$uri = $_SERVER['QUERY_STRING'];
+parse_str($uri, $output);
+$genre_id = intval($output['genre_id']);
+
+$sql = "SELECT * FROM tbl_uploads WHERE genre_id='$genre_id' ORDER BY id desc limit 10";
 $result = mysqli_query($link, $sql) or die("Error in Selecting " . mysqli_error($link));
 
  $emparray = array();
     while($row =mysqli_fetch_assoc($result))
     {
-        
-        $emparray[0]="top_10";
         $emparray[]= $row;
     }
 

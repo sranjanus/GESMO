@@ -10,6 +10,7 @@ if(isset($_POST['btn-upload']))
 	$songname = $_POST["name"];
 	$artistname = $_POST["artist"];
 	$folder="uploads/";
+	$genre = $_POST["genre"];
 	
 	// new file size in KB
 	$new_size = $file_size/1024;  
@@ -23,16 +24,11 @@ if(isset($_POST['btn-upload']))
 	
 	if(move_uploaded_file($file_loc,$folder.$final_file))
 	{
-		$sql="INSERT INTO tbl_uploads(file,type,size,Songname,artistname) VALUES('$final_file','$file_type','$new_size','$songname','$artistname')";
+		$sql="INSERT INTO tbl_uploads(file,type,size,name,artistname,Genre) VALUES('$final_file','$file_type','$new_size','$songname','$artistname','$genre')";
 		mysqli_query($link,$sql);
-        $result = mysqli_query($link,"SELECT * FROM artists WHERE artistname='$artistname' LIMIT 1");
+        //$result = mysqli_query($link,"SELECT * FROM artists WHERE artistname='$artistname' LIMIT 1");
 
-    if(mysqli_fetch_array($result) != true)
-        {
-            $sql="INSERT INTO artists(artistname) VALUES('$artistname')";
-		mysqli_query($link,$sql);
-
-        }
+   
     
 		?>
 		<script>

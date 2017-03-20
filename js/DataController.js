@@ -1,5 +1,6 @@
-GESMO.DataController = function(){
-	this.urlPath = "http://localhost/Gesmo/testData/";
+GESMO.DataController = function(logger){
+	this.urlPath = "http://localhost/Gesmo/";
+	this.logger =logger;
 };
 
 GESMO.DataController.prototype = {
@@ -7,53 +8,46 @@ GESMO.DataController.prototype = {
 		var completePath = this.urlPath;
 		switch(searchQuery.type){
 			case "artists" : {
-				completePath += "artists.json";
+				completePath += "artist_fetch.php";
+				break;
+			}
+			case "genres" : {
+				completePath += "Genre.php";
 				break;
 			}
 			case "albums" : {
-				completePath += "albums.json";
+				if(searchQuery.filterName == "mostRecent"){
+					completePath += "newReleases.php";
+					completePath += "?" + searchQuery.filterName + "=" + searchQuery.filterValue;
+				}
 				break;
 			}
 			case "songs" : {
-				completePath += "songs.json";
+				if(searchQuery.filterName == "artist_id"){
+					completePath += "fetchartistsong.php";
+					completePath += "?" + searchQuery.filterName + "=" + searchQuery.filterValue;
+				} else if(searchQuery.filterName == "genre_id"){
+					completePath += "top.php";
+					completePath += "?" + searchQuery.filterName + "=" + searchQuery.filterValue;
+				} else if(searchQuery.filterName == "album_id"){
+					completePath += "Songalbum.php";
+					completePath += "?" + searchQuery.filterName + "=" + searchQuery.filterValue;
+				}
 				break;
 			}
 		}
 
-		$.ajax({url: completePath, async: false, success: function(result, status, xhr){
-			if(searchQuery.filterName == null){
-				var list = result[searchQuery.type];
-				list.sort(function(a, b){
-					var aname = a.name.toUpperCase();
-					var bname = b.name.toUpperCase();
-					if(aname < bname) return -1;
-				    if(aname > bname) return 1;
-				    return 0;
-				});
+		this.logger.log("datacontroller, sending request to, (" + completePath + ") ");
+		$.ajax({url: completePath, async: true, success: function(result, status, xhr){
+			this.logger.log("datacontroller, request success, status");
+				var list = result;
 			    onSuccess(searchQuery.type, list);
-			} else{
-				var filteredList = [];
-				result[searchQuery.type].forEach(function(item){
-					if(item[searchQuery.filterName] == searchQuery.filterValue){
-						filteredList.push(item);
-					}
-				}.bind(this));
-
-				filteredList.sort(function(a, b){
-					var aname = a.name.toUpperCase();
-					var bname = b.name.toUpperCase();
-					if(aname < bname) return -1;
-				    if(aname > bname) return 1;
-				    return 0;
-				});
-
-				onSuccess(searchQuery.type, filteredList);
-			}
-		}, error: function(xhr, status, error){
+		}.bind(this), error: function(xhr, status, error){
+			this.logger.log("datacontroller, request failure, " + error);
 			console.log(xhr);
 			console.log(status);
 			console.log(error);
-		}, dataType: "json"});
+		}.bind(this), dataType: "json"});
 	}
 };
 

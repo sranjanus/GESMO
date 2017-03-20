@@ -25,62 +25,135 @@
   		<!-- howler files -->
   		<script type="text/javascript" src="js/player/howler.core.js"></script>
   		<script type="text/javascript" src="js/player/siriwave.js"></script>
+  		<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Droid+Serif" />
 		<style type="text/css">
-			body { font: 12pt monospace; margin: 0; overflow: hidden; background-color: black;}
+			body { font-size: 12pt; font-family: "Droid Serif"; margin: 0; overflow: hidden; background-color: black;}
+			
+			#userMap{
+				  position: absolute;
+				  width: 225px;
+				  height: 225px;
+				  padding: 0;
+				  margin: 50px 50px;
+				  overflow: hidden;
+				  background: transparent;
+				  font-family: "Helvetica Neue", "Futura", "Trebuchet MS", Arial;
+				  -webkit-user-select: none;
+				  user-select: none;
+				  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+				  z-index: 999;
+				 font-size: 11px;
+				 color: white;
+				 display: none;
+			}
 
-			#curtainContainer {
-				position: absolute;
-				top: 0;
-				left: 0;
+			#userMap table {
 				width: 100%;
 				height: 100%;
-				z-index: 999;
 			}
 
-			.openingCurtain {
-				position: relative;
-				width: 49.5%;
-				height: 100%;
-				background: black;
-				border: 5px dashed gray;
-				z-index: 1000;
-			}
-
-			#leftCurtain {
-				border-left: none;
-				float: left;
-			}
-
-			#rightCurtain{
-				float: right;
-				border-right: none;
-			}
-
-			#messageboard{
-				width: 500px;
-				height: 100%;
-				position: relative;
-				margin: auto auto;
-				border: 5px dashed gray;
-				background: black;
-				color: white;
+			#userMap td {
 				text-align: center;
-				font-size: 20px;
-				z-index: 1000;
-				vertical-align: middle;
 			}
 
-			#messageboard p{
-				position: absolute;
-				top: 50%;
+			#userMap .box{
+				padding: 0;
+				border: 2px solid rgba(33, 148, 206, 0.25);
+				border-radius:4px 4px;
+			}
+
+			#tuts{
+				  position: absolute;
+				  width: 225px;
+				  height: 225px;
+				  padding: 0;
+				  right: 0;
+				  margin: 50px 50px;
+				  overflow: hidden;
+				  background: transparent;
+				  font-family: "Helvetica Neue", "Futura", "Trebuchet MS", Arial;
+				  -webkit-user-select: none;
+				  user-select: none;
+				  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+				  z-index: 999;
+				 font-size: 11px;
+				 color: white;
+			}
+
+			#tuts table {
+				width: 100%;
+				height: 100%;
+			}
+
+			#tuts td {
 				text-align: center;
-				vertical-align: middle;
-				display: block;
+			}
+
+			#tuts .box{
+				padding: 0px;
+				border: 2px solid rgba(33, 148, 206, 0.25);
+				border-radius:4px 4px;
+				background: transparent;
+				cursor: pointer;
+			}
+
+			#tuts .box:hover {
+				border-color: rgba(33, 148, 206, 1);
+				background: rgba(33, 148, 206, 0.25);
 			}
 		</style>
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 	</head>
 	<body>
+		 <div id="userMap">
+		 	<table>
+		 		<tr>
+		 			<td></td>
+		 			<td class="box" colspan="3">New Releases</td>
+		 			<td></td>
+		 		</tr>
+		 		<tr>
+		 			<td class="box" rowspan="3">Artists</td>
+		 			<td rowspan="3" colspan="3">MAP</td>
+		 			<td class="box" rowspan="3">Charts</td>
+		 		</tr>
+		 		<tr></tr>
+		 		<tr></tr>
+		 		<tr>
+		 			<td></td>
+		 			<td class="box" colspan="3">Queue</td>
+		 			<td></td>
+		 		</tr>
+		 	</table>
+		 </div>
+		 <div id="tuts">
+		 	<table>
+		 		<tr>
+		 			<td></td>
+		 			<td id="introduction" class="box" colspan="4">Introduction</td>
+		 			<td></td>
+		 		</tr>
+		 		<tr>
+		 			<td id="applicationStart" class="box" rowspan="2">Application Start</td>
+		 			<td rowspan="4" colspan="4">TUTORIALS</td>
+		 			<td id="itemSelection" class="box" rowspan="2">Item Selection</td>
+		 		</tr>
+		 		<tr>
+		 		</tr>
+		 		<tr>
+		 			<td id="navigation" class="box" rowspan="2">Navigation</td>
+		 			<td id="volumeControl" class="box" rowspan="2">Volume Control</td>
+		 		</tr>
+		 		<tr>
+		 		</tr>
+		 		<tr>
+		 			<td></td>
+		 			<td id="pauseAndPlay" class="box" colspan="2">Pause and Play</td>
+		 			<td id="nextAndPrevious" class="box" colspan="2">Previous and Next</td>
+		 			<td></td>
+		 		</tr>
+		 	</table>
+		 </div>
 		<!--<div id="container"></div>-->
 		<div id="playerContainer">
 			<div id="title">
@@ -88,38 +161,29 @@
 			    <div id="timer">0:00</div>
 			    <div id="duration">0:00</div>
 		  	</div>
-
-		  <!-- Controls -->
-		  <div class="controlsOuter">
+		  <!-- Progress -->
+		  <div id="progress"></div>
+		</div>
+		<div class="controlsOuter">
+		    <div class="btn" id="volumeBtn"></div>
 		    <div class="controlsInner">
 		      <div id="loading"></div>
+		      <div id="waveform"></div>
+		      		  <!-- Volume -->
+			  <div id="volume" class="fadeout">
+			    <div id="barFull" class="bar"></div>
+			    <div id="barEmpty" class="bar"></div>
+			    <div id="sliderBtn"></div>
+			  </div>
 		      <div class="btn" id="playBtn"></div>
 		      <div class="btn" id="pauseBtn"></div>
 		      <div class="btn" id="nextBtn"></div>
 		      <div class="btn" id="prevBtn"></div>
 		      <div class="btn" id="stopBtn"></div>
-		    </div>
-		    <div class="btn" id="volumeBtn"></div>
-		  </div>
-
-		  <!-- Progress -->
-		  <div id="waveform"></div>
-		  <div id="bar"></div>
-		  <div id="progress"></div>
-
-		  <!-- Volume -->
-		  <div id="volume" class="fadeout">
-		    <div id="barFull" class="bar"></div>
-		    <div id="barEmpty" class="bar"></div>
-		    <div id="sliderBtn"></div>
-		  </div>
-		</div>
-		<!-- <div id="curtainContainer">
-			<div id="leftCurtain" class="openingCurtain"></div>
-			<div id="rightCurtain" class="openingCurtain"></div>
-			<div id="messageboard"></div>
-		</div> -->
+			</div>
+		 </div>
 		<script type="text/javascript" src="js/gesmo.js"></script>
+		<script type="text/javascript" src="js/GesmoLogger.js"></script>
 		<script type="text/javascript" src="js/DataController.js"></script>
 		<script type="text/javascript" src="js/GesmoUI.js"></script>
 		<script type="text/javascript" src="js/uiassets.js"></script>
