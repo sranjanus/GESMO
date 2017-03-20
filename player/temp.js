@@ -268,36 +268,30 @@ Player.prototype = {
 };
 
 // Setup our new audio player class and pass it the playlist.
-my_songs=[];
 
-// Setup our new audio player class and pass it the playlist.
-function pack_songs(song){
-    return{file: song, title:song, howl: null};
-    }
-    
-function add_to_playlist(song){
-    my_songs.push(pack_songs(song)); 
-    }
-    
-function remove_from_playlist(song){
-    temp=[]
-    for (var i=0; i<my_songs.length; i++){
-        if ( JSON.stringify(my_songs[i])!= JSON.stringify(pack_songs(song))){ 
-            temp.push(my_songs[i]);}
-            }
-    my_songs=temp;
-            
-    //index=my_songs.indexOf(pack_songs(song));
-     //my_songs.splice(index,1);
-    }
-      
-add_to_playlist('80s_vibe'); 
-add_to_playlist('sound');
-add_to_playlist('running_out');
-remove_from_playlist('sound');
-
-var player = new Player(my_songs);     
-
+var player = new Player([
+  {
+    title: 'Rave Digger',
+    file: 'rave_digger',
+    howl: null
+  },
+  {
+    title: '80s Vibe',
+    file: '80s_vibe',
+    howl: null
+  },
+  {
+    title: 'Running Out',
+    file: 'running_out',
+    howl: null
+  },
+  {
+    title: 'Sound',
+    file: 'sound',
+    howl: null
+  }
+  
+]);
 
 // Bind our player controls.
 playBtn.addEventListener('click', function() {

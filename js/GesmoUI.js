@@ -971,6 +971,7 @@ GESMO.GesmoUI.prototype = {
 				 	.easing( TWEEN.Easing.Exponential.InOut )
 				 	.onComplete(function(){
 				 		this.destroyLibrary(null, null);
+				 		var oldView = this.viewMode;
 				 		this.viewMode++;
 				 		if(this.viewMode > this.mainList.length - 1) this.viewMode = 0;
 				 		this.loadSection();
@@ -978,7 +979,7 @@ GESMO.GesmoUI.prototype = {
 				 		if(callback != null)
 				 			callback();
 				 		var event = new CustomEvent('gesmo.ui.setusermap');
-				 		this.logger.log("ui, movedToSection, " + this.viewMode);
+				 		this.logger.log("ui, movedToSection, from " + oldView + "to " + this.viewMode);
 				 		window.dispatchEvent(event);
 				 	}.bind(this));
 
@@ -992,6 +993,7 @@ GESMO.GesmoUI.prototype = {
 				 	.easing( TWEEN.Easing.Exponential.InOut )
 				 	.onComplete(function(){
 				 		this.destroyLibrary(null, null);
+				 		var oldView = this.viewMode;
 				 		this.viewMode--;
 				 		if(this.viewMode < 0) this.viewMode = this.mainList.length - 1;
 				 		this.loadSection();
@@ -999,7 +1001,7 @@ GESMO.GesmoUI.prototype = {
 				 		if(callback != null)
 				 			callback();
 				 		var event = new CustomEvent('gesmo.ui.setusermap');
-				 		this.logger.log("ui, movedToSection, " + this.viewMode);
+				 		this.logger.log("ui, movedToSection, from " + oldView + "to " + this.viewMode);
 				 			window.dispatchEvent(event);
 				 	}.bind(this));
 

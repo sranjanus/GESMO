@@ -114,12 +114,11 @@
     			ui.onHandMove(handMesh);
 
     			if(this.shouldPick(anchorHands2[0], hands[0])/* && this.pinchReal(hands[0])*/){
-		
+					this.logger.log("gesture, pinch, made");
 	 				var eventObj = {
 	 					button: 0
 	 				};
 	 				ui.onClick(eventObj);
-	 				this.logger.log("gesture, pinch, made");
 	 				return;
 	 			}
 
@@ -150,16 +149,17 @@
 		 						var isHorizontal = Math.abs(gesture.direction[0]) > Math.abs(gesture.direction[1]);
 		 						if(isHorizontal && !this.swipedHorizontal){
 		 							var distance = Math.abs(gesture.position[0] - gesture.startPosition[0]);
+		 							if(distance > 175){
+		 								this.logger.log("gesture, swipe, made for previous or next");
+		 							}
 		 							if(distance > 200){
 			 							if(gesture.direction[0] > 0){
 			 								player.skip("next");
 			 								$(nextBtn).fadeIn("slow");
-			 								this.logger.log("gesture, swipe, made for next");
 			 							} else {
 			 								if(distance > 200){
 			 									player.skip("prev");
 			 									$(prevBtn).fadeIn("slow");
-			 									this.logger.log("gesture, swipe, made for previous");
 			 								}
 			 							}
 			 							this.swipedHorizontal = true;
@@ -172,6 +172,9 @@
 		 						} else {
 		 							if(!this.swipedVertical){
 		 								var distance = Math.abs(gesture.position[1] - gesture.startPosition[1]);
+		 								if(distance > 125){
+		 									this.logger.log("gesture, swipe, made to change volume");
+		 								}
 		 								if(distance > 150){
 				 							var a = Howler._volume;
 				 							$(volume).fadeIn();
@@ -180,14 +183,12 @@
 				 									a = a + 0.1;
 				 								}
 				 								player.volume(a);
-				 								this.logger.log("gesture, swipe, made to increase volume");
 				 							} else {
 				 								if(distance > 150){
 				 									if(a > 0.1){
 				 										a = a-0.1;
 				 									}
 				 									player.volume(a);
-				 									this.logger.log("gesture, swipe, made to decrese volume");
 				 								}
 				 							}
 				 							this.swipedVertical = true;
@@ -217,6 +218,7 @@
  						}.bind(this), 400);
  					return;
  				} else {
+ 					this.logger.log("gesture, grab, made to play or pause");
  					if(this.player.state != GESMO.PLAYING 
  					&& this.player.checkPlaylistState != GESMO.PLAYLISTEMPTY && this.startGesture && !this.pausePlaying){
  						this.pausePlaying = true;
@@ -227,7 +229,6 @@
  								this.pausePlaying = false;
  							}.bind(this));
  						}.bind(this), 200);
- 						this.logger.log("gesture, grab, made to play");
  						return;
 	 				}
 
@@ -240,7 +241,6 @@
  								this.pausePlaying = false;
  							}.bind(this));
  						}.bind(this), 200);
- 						this.logger.log("gesture, grab, made to pause");
 	 					return;
 	 				}
  				}
@@ -261,29 +261,18 @@
 
  		if(ui.viewMode == GESMO.QUEUEVIEW){
  			if(Math.abs(translation[1]) > Math.abs(translation[0])){
-	 			// translation[0] = 0;
-	 			// translation[2] = 0;
-	 			
-	 			// this.vector.fromArray(translation);
-	 			// this.vector.multiplyScalar(this.translationSpeed);
-	 			// this.vector.applyQuaternion(ui.movableObjects.quaternion);
-	 			// this.translationMomentum.add(this.vector);
-
-	 			// this.ui.movableObjects.position.add(this.translationMomentum);
-	 			// this.translationMomentum.multiplyScalar(this.translationDecay);
-	 			// this.swipedHorizontal = false;
-	 			// this.swipedVertical = false;
+ 				if(Math.abs(translation[1]) > 10){
+ 					this.logger.log("gesture, grab and pull, made to moveInSection: up or down");
+ 				}
 	 			if(Math.abs(translation[1]) > 15){
 	 				if(translation[1] < 0){
 	 					ui.moveInSection("up");
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: " + ui.viewMode + ": up");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
 	 					}.bind(this), 1100);
 	 				} else {
 	 					ui.moveInSection("down"), 
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: " + ui.viewMode + "down");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
@@ -291,17 +280,18 @@
 	 				}
 	 			}
 	 		} else {
+	 			if(Math.abs(translation[0]) > 10){
+ 					this.logger.log("gesture, grab and pull, made to moveToSection: left or right");
+ 				}
 	 			if(Math.abs(translation[0]) > 15){
 	 				if(translation[0] > 0){
 	 					ui.moveToSection("left");
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: left");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
 	 					}.bind(this), 1200);
 	 				} else {
 	 					ui.moveToSection("right");
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: right");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
@@ -311,29 +301,18 @@
 	 		}
  		} else {
 	 		if(Math.abs(translation[2]) > Math.abs(translation[0])){
-	 			// translation[0] = 0;
-	 			// translation[1] = 0;
-	 			
-	 			// this.vector.fromArray(translation);
-	 			// this.vector.multiplyScalar(this.translationSpeed);
-	 			// this.vector.applyQuaternion(ui.movableObjects.quaternion);
-	 			// this.translationMomentum.add(this.vector);
-
-	 			// this.ui.movableObjects.position.add(this.translationMomentum);
-	 			// this.translationMomentum.multiplyScalar(this.translationDecay);
-	 			// this.swipedHorizontal = false;
-	 			// this.swipedVertical = false;
+	 			if(Math.abs(translation[2]) > 10){
+ 					this.logger.log("gesture, grab and pull, made to moveInSection: forward or backward");
+ 				}
 	 			if(Math.abs(translation[2]) > 15){
 	 				if(translation[2] > 0){
 	 					ui.moveInSection("forward");
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: " + ui.viewMode + ": forward");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
 	 					}.bind(this), 1100);
 	 				} else {
 	 					ui.moveInSection("backward");
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: " + ui.viewMode + ": backward");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
@@ -341,17 +320,18 @@
 	 				}
 	 			}
 	 		} else {
+	 			if(Math.abs(translation[0]) > 10){
+ 					this.logger.log("gesture, grab and pull, made to moveToSection: left or right");
+ 				}
 	 			if(Math.abs(translation[0]) > 15){
 	 				if(translation[0] > 0){
 	 					ui.moveToSection("left");
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: left");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
 	 					}.bind(this), 1100);
 	 				} else {
 	 					ui.moveToSection("right"), 
-	 					this.logger.log("gesture, grab and pull, made to moveInSection: right");
 	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
