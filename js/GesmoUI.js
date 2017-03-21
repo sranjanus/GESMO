@@ -109,80 +109,80 @@
 
 	this.appStarted = false;
 
-	var objLoader = new THREE.OBJLoader();
-	objLoader.load("http://localhost/GESMO/models/music_note.obj", function(loadedMesh){
-		var mat = new THREE.MeshPhongMaterial({
-			color: 0x2194ce,
-			specular: 0x111111,
-			shininess: 30,
-			shading: THREE.SmoothShading,
-			vertexColors: THREE.NoColors
-		});
-		loadedMesh.children.forEach(function(child){
-		   	child.material = mat;
-		   	child.geometry.computeFaceNormals();
-		   	child.geometry.computeVertexNormals();
-		 });
-		 loadedMesh.scale.set(0.5, 0.5, 0.5);
-		this.note_model = loadedMesh;
-		this.logger.log("ui, loaded, http://localhost/GESMO/models/music_note.obj");
-	}.bind(this));
+	// var objLoader = new THREE.OBJLoader();
+	// objLoader.load("http://localhost/GESMO/models/music_note.obj", function(loadedMesh){
+	// 	var mat = new THREE.MeshPhongMaterial({
+	// 		color: 0x2194ce,
+	// 		specular: 0x111111,
+	// 		shininess: 30,
+	// 		shading: THREE.SmoothShading,
+	// 		vertexColors: THREE.NoColors
+	// 	});
+	// 	loadedMesh.children.forEach(function(child){
+	// 	   	child.material = mat;
+	// 	   	child.geometry.computeFaceNormals();
+	// 	   	child.geometry.computeVertexNormals();
+	// 	 });
+	// 	 loadedMesh.scale.set(0.5, 0.5, 0.5);
+	// 	this.note_model = loadedMesh;
+	// 	this.logger.log("ui, loaded, http://localhost/GESMO/models/music_note.obj");
+	// }.bind(this));
 
-	objLoader.load("http://localhost/GESMO/models/guitar.obj", function(loadedMesh){
-		var mat = new THREE.MeshPhongMaterial({
-			color: 0xce6821,
-			specular: 0x111111,
-			shininess: 30,
-			shading: THREE.SmoothShading,
-			vertexColors: THREE.NoColors
-		});
-		loadedMesh.children.forEach(function(child){
-		   	child.material = mat;
-		   	child.geometry.computeFaceNormals();
-		   	child.geometry.computeVertexNormals();
-		 });
-		 loadedMesh.scale.set(0.5, 0.5, 0.5);
-		this.guitar_model = loadedMesh;
-		this.guitar_model.rotateZ(Math.PI/4);
-		this.logger.log("ui, loaded, http://localhost/GESMO/models/guitar.obj");
-	}.bind(this));
+	// objLoader.load("http://localhost/GESMO/models/guitar.obj", function(loadedMesh){
+	// 	var mat = new THREE.MeshPhongMaterial({
+	// 		color: 0xce6821,
+	// 		specular: 0x111111,
+	// 		shininess: 30,
+	// 		shading: THREE.SmoothShading,
+	// 		vertexColors: THREE.NoColors
+	// 	});
+	// 	loadedMesh.children.forEach(function(child){
+	// 	   	child.material = mat;
+	// 	   	child.geometry.computeFaceNormals();
+	// 	   	child.geometry.computeVertexNormals();
+	// 	 });
+	// 	 loadedMesh.scale.set(0.5, 0.5, 0.5);
+	// 	this.guitar_model = loadedMesh;
+	// 	this.guitar_model.rotateZ(Math.PI/4);
+	// 	this.logger.log("ui, loaded, http://localhost/GESMO/models/guitar.obj");
+	// }.bind(this));
 
-	objLoader.load("http://localhost/GESMO/models/record.obj", function(loadedMesh){
-		var mat = new THREE.MeshPhongMaterial({
-			color: 0xff0000,
-			specular: 0x111111,
-			shininess: 30,
-			shading: THREE.SmoothShading,
-			vertexColors: THREE.NoColors
-		});
-		loadedMesh.children.forEach(function(child){
-		   	child.material = mat;
-		   	child.geometry.computeFaceNormals();
-		   	child.geometry.computeVertexNormals();
-		 });
-		 loadedMesh.scale.set(2, 2, 3);
-		this.record_model = loadedMesh;
-		this.record_model.rotateX(-Math.PI/4);
-		this.logger.log("ui, loaded, http://localhost/GESMO/models/record.obj");
-	}.bind(this));
+	// objLoader.load("http://localhost/GESMO/models/record.obj", function(loadedMesh){
+	// 	var mat = new THREE.MeshPhongMaterial({
+	// 		color: 0xff0000,
+	// 		specular: 0x111111,
+	// 		shininess: 30,
+	// 		shading: THREE.SmoothShading,
+	// 		vertexColors: THREE.NoColors
+	// 	});
+	// 	loadedMesh.children.forEach(function(child){
+	// 	   	child.material = mat;
+	// 	   	child.geometry.computeFaceNormals();
+	// 	   	child.geometry.computeVertexNormals();
+	// 	 });
+	// 	 loadedMesh.scale.set(2, 2, 3);
+	// 	this.record_model = loadedMesh;
+	// 	this.record_model.rotateX(-Math.PI/4);
+	// 	this.logger.log("ui, loaded, http://localhost/GESMO/models/record.obj");
+	// }.bind(this));
 
-	objLoader.load("http://localhost/GESMO/models/10.obj", function(loadedMesh){
-		var mat = new THREE.MeshPhongMaterial({
-			color: 0xff0000,
-			specular: 0x111111,
-			shininess: 30,
-			shading: THREE.SmoothShading,
-			vertexColors: THREE.NoColors
-		});
-		loadedMesh.children.forEach(function(child){
-		   	child.material = mat;
-		   	child.geometry.computeFaceNormals();
-		   	child.geometry.computeVertexNormals();
-		 });
-		 loadedMesh.scale.set(1, 1, 1);
-		this.ten_model = loadedMesh;
-		this.logger.log("ui, loaded, http://localhost/GESMO/models/10.obj");
-	}.bind(this));
+	// objLoader.load("http://localhost/GESMO/models/10.obj", function(loadedMesh){
+	// 	var mat = new THREE.MeshPhongMaterial({
+	// 		color: 0xff0000,
+	// 		specular: 0x111111,
+	// 		shininess: 30,
+	// 		shading: THREE.SmoothShading,
+	// 		vertexColors: THREE.NoColors
+	// 	});
+	// 	loadedMesh.children.forEach(function(child){
+	// 	   	child.material = mat;
+	// 	   	child.geometry.computeFaceNormals();
+	// 	   	child.geometry.computeVertexNormals();
+	// 	 });
+	// 	 loadedMesh.scale.set(1, 1, 1);
+	// 	this.ten_model = loadedMesh;
+	// 	this.logger.log("ui, loaded, http://localhost/GESMO/models/10.obj");
+	// }.bind(this));
 
 	var fontLoader = new THREE.FontLoader();
 	fontLoader.load("http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json", function(font){
@@ -500,75 +500,71 @@ GESMO.GesmoUI.prototype = {
 	},
 
 	addImage: function (mesh) {
-		// var imagePath = "http://localhost/GESMO/testData/";
-		// if(mesh.userData.image){
-		// 	imagePath += mesh.userData.image;
-		// } else {
-		// 	var type = mesh.userData.type;
-		// 	if(type == "albums"){
-		// 		imagePath += "album5.png";
-		// 	} else if(type == "artists"){
-		// 		imagePath += "artist.png";
-		// 	} else if(type == "genres"){
-		// 		imagePath += "genre.png";
-		// 	} else if(type == "songs"){
-		// 		imagePath += "song1.png";
-		// 	} else {
-		// 		if(mesh.userData.index == this.curSongIndex){
-		// 			imagePath += "song2.png";
-		// 		} else {
-		// 			imagePath += "song3.png";
-		// 		}	
-		// 	}
-		// }
-		
-		// var img = new THREE.MeshPhongMaterial({
-		// 	map:THREE.ImageUtils.loadTexture(imagePath),
-		// 	side: THREE.DoubleSide
-		// });
-		// img.map.needsUpdate = true;
-
-		// var planeHt, planeWd;
-		// if(mesh.geometry.parameters){
-		// 	planeHt = mesh.geometry.parameters.height;
-		// 	planeWd = mesh.geometry.parameters.width;
-		// } else {
-		// 	planeHt = 70;
-		// 	planeWd = 70;
-		// }
-
-		// var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeWd, planeHt), img);
-		// plane.overdraw = true;
-		// plane.name = "image_plane";
-		// mesh.add(plane);
-
-		var fig = new THREE.Group();
-		var modelToClone;
-		var type = mesh.userData.type;
+		var imagePath = "http://localhost/GESMO/images/";
+		if(mesh.userData.image){
+			imagePath += mesh.userData.image;
+		} else {
+			var colorIndex = Math.floor(Math.random()*10) + 1;
+			console.log(colorIndex);
+			var type = mesh.userData.type;
 			if(type == "albums"){
-				modelToClone = this.record_model;
+				imagePath += "album_flat_" + colorIndex + ".png";
 			} else if(type == "artists"){
-				modelToClone = this.guitar_model;
+				imagePath += "artist_flat_" + colorIndex + ".png";
 			} else if(type == "genres"){
-				modelToClone = this.ten_model;
-			} else{
-				modelToClone = this.note_model;
+				imagePath += "genre_flat_" + colorIndex + ".png";
+			} else {
+				imagePath += "song_flat_" + colorIndex + ".png";
 			}
-
-		fig.add(new THREE.Mesh(modelToClone.children[0].geometry.clone(), modelToClone.children[0].material.clone()));
-		fig.rotation.x = modelToClone.rotation.x;
-		fig.rotation.y = modelToClone.rotation.y;
-		fig.rotation.z = modelToClone.rotation.z;
-		fig.scale.x = modelToClone.scale.x;
-		fig.scale.y = modelToClone.scale.y;
-		fig.scale.z = modelToClone.scale.z;
-		fig.name = "image_plane";
-		fig.children.forEach(function (child) {
-			child.material.color = mesh.material.color;
-			child.material.needsUpdate = true;
-		}.bind(this));
+		}
 		
-		mesh.add(fig);
+		var img = new THREE.MeshPhongMaterial({
+			map:THREE.ImageUtils.loadTexture(imagePath),
+			side: THREE.DoubleSide
+		});
+		img.map.needsUpdate = true;
+
+		var planeHt, planeWd;
+		if(mesh.geometry.parameters){
+			planeHt = mesh.geometry.parameters.height;
+			planeWd = mesh.geometry.parameters.width;
+		} else {
+			planeHt = 70;
+			planeWd = 70;
+		}
+
+		var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeWd, planeHt), img);
+		plane.overdraw = true;
+		plane.name = "image_plane";
+		mesh.add(plane);
+
+		// var fig = new THREE.Group();
+		// var modelToClone;
+		// var type = mesh.userData.type;
+		// 	if(type == "albums"){
+		// 		modelToClone = this.record_model;
+		// 	} else if(type == "artists"){
+		// 		modelToClone = this.guitar_model;
+		// 	} else if(type == "genres"){
+		// 		modelToClone = this.ten_model;
+		// 	} else{
+		// 		modelToClone = this.note_model;
+		// 	}
+
+		// fig.add(new THREE.Mesh(modelToClone.children[0].geometry.clone(), modelToClone.children[0].material.clone()));
+		// fig.rotation.x = modelToClone.rotation.x;
+		// fig.rotation.y = modelToClone.rotation.y;
+		// fig.rotation.z = modelToClone.rotation.z;
+		// fig.scale.x = modelToClone.scale.x;
+		// fig.scale.y = modelToClone.scale.y;
+		// fig.scale.z = modelToClone.scale.z;
+		// fig.name = "image_plane";
+		// fig.children.forEach(function (child) {
+		// 	child.material.color = mesh.material.color;
+		// 	child.material.needsUpdate = true;
+		// }.bind(this));
+		
+		// mesh.add(fig);
 	},
 
 	assignTargets: function(type, start, end){
@@ -856,6 +852,9 @@ GESMO.GesmoUI.prototype = {
 
  	onClick: function(event){
  		if(!this.appStarted){
+ 		// 	$("#playerContainer").fadeIn("slow");
+			// $("#userMap").fadeIn("slow");
+			// this.createHome();
  			return;
  		}
 
@@ -1163,8 +1162,11 @@ GESMO.GesmoUI.prototype = {
 	highlightElement: function(element){
 		var imagePlane = element.getObjectByName("image_plane");
 		if(imagePlane){
-			imagePlane.currentHex = imagePlane.children[0].material.emissive.getHex();
-			imagePlane.children[0].material.emissive.setHex(0x2194ce); 
+			// imagePlane.currentHex = imagePlane.children[0].material.emissive.getHex();
+			// imagePlane.children[0].material.emissive.setHex(0x2194ce); 
+
+			imagePlane.currentHex = imagePlane.material.emissive.getHex();
+			imagePlane.material.emissive.setHex(0x2194ce); 
 		}
 		var flabel = element.getObjectByName("flabel");
 		if(flabel){
@@ -1177,7 +1179,8 @@ GESMO.GesmoUI.prototype = {
 	removeHighlight: function(element){
 		var imagePlane = element.getObjectByName("image_plane");
 		if(imagePlane){
-			imagePlane.children[0].material.emissive.setHex(imagePlane.currentHex);
+			//imagePlane.children[0].material.emissive.setHex(imagePlane.currentHex);
+			imagePlane.material.emissive.setHex(imagePlane.currentHex);
 		}
 		var flabel = element.getObjectByName("flabel");
 		if(flabel){
