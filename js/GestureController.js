@@ -100,7 +100,9 @@
  		if(hands.length == 1 && this.startGesture){
  			if(hands[0].type == "right" && anchorHands[0].type == "right"){
 
- 				if(!this.swipedHorizontal && !this.swipedVertical && this.shouldTranslateOrRotate(anchorHands[0], hands[0])){
+ 				if(this.shouldTranslateOrRotate(anchorHands[0], hands[0])){
+ 					this.swipedHorizontal = true;
+ 					this.swipedVertical = true;
  					this.applyTranslationOrRotation(anchorHands[0], hands[0]);
  					return;
  				}
@@ -111,7 +113,7 @@
     			
     			ui.onHandMove(handMesh);
 
-    			if(!this.swipedHorizontal && !this.swipedVertical && this.shouldPick(anchorHands2[0], hands[0])/* && this.pinchReal(hands[0])*/){
+    			if(this.shouldPick(anchorHands2[0], hands[0])/* && this.pinchReal(hands[0])*/){
 					this.logger.log("gesture, pinch, made");
 	 				var eventObj = {
 	 					button: 0
@@ -145,31 +147,27 @@
 		 						var pointableID = gesture.pointableIds[0];
 		 						var direction = frame.pointable(pointableID).direction;
 		 						var isHorizontal = Math.abs(gesture.direction[0]) > Math.abs(gesture.direction[1]);
-		 						if(!this.swipedHorizontal && isHorizontal){
+		 						if(isHorizontal && !this.swipedHorizontal){
 		 							var distance = Math.abs(gesture.position[0] - gesture.startPosition[0]);
 		 							if(distance > 175){
 		 								this.logger.log("gesture, swipe, made for previous or next");
 		 							}
 		 							if(distance > 200){
 			 							if(gesture.direction[0] > 0){
-			 								this.swipedHorizontal = true;
 			 								player.skip("next");
-			 								$(nextBtn).fadeIn("slow", function(){
-			 									$(nextBtn).fadeOut("slow", function(){
-			 										this.swipedHorizontal = false;
-			 									}.bind(this));
-			 								}.bind(this));
+			 								$(nextBtn).fadeIn("slow");
 			 							} else {
 			 								if(distance > 200){
-			 									this.swipedHorizontal = true;
 			 									player.skip("prev");
-			 									$(prevBtn).fadeIn("slow", function(){
-			 										$(prevBtn).fadeOut("slow", function(){
-			 											this.swipedHorizontal = false;
-			 										}.bind(this));
-			 									}.bind(this));
+			 									$(prevBtn).fadeIn("slow");
 			 								}
 			 							}
+			 							this.swipedHorizontal = true;
+			 							setTimeout(function(){
+			 								$(nextBtn).fadeOut("slow");
+			 								$(prevBtn).fadeOut("slow");
+			 								this.swipedHorizontal = false;
+			 							}.bind(this), 400);
 			 						}
 		 						} else {
 		 							if(!this.swipedVertical){
@@ -178,33 +176,26 @@
 		 									this.logger.log("gesture, swipe, made to change volume");
 		 								}
 		 								if(distance > 150){
-		 									this.swipedVertical = true;
 				 							var a = Howler._volume;
+				 							$(volume).fadeIn();
 				 							if(gesture.direction[1] > 0){
 				 								if(a < 1){
 				 									a = a + 0.1;
 				 								}
-				 								$(volume).fadeIn("slow", function() {
-				 									player.volume(a);
-				 									$(volume).fadeOut("slow", function(){
-														this.swipedVertical = false;
-				 									}.bind(this));
-				 								}.bind(this));
+				 								player.volume(a);
 				 							} else {
 				 								if(distance > 150){
-				 									this.swipedVertical = true;
 				 									if(a > 0.1){
 				 										a = a-0.1;
 				 									}
-				 									$(volume).fadeIn("slow", function() {
-					 									player.volume(a);
-					 									$(volume).fadeOut("slow", function(){
-															this.swipedVertical = false;
-					 									}.bind(this));
-					 								}.bind(this));
+				 									player.volume(a);
 				 								}
 				 							}
-				 							
+				 							this.swipedVertical = true;
+				 							setTimeout(function(){
+				 								$(volume).fadeOut();
+			 									this.swipedVertical = false;
+			 								}.bind(this), 600);
 				 						}
 		 							}
 		 						}
@@ -215,37 +206,41 @@
 		 		}.bind(this));
  			} 
  		} else if(hands.length == 2){
- 			if(!this.pausePlaying && this.shouldTogglePlay(anchorHands1, hands)){
+ 			if(this.shouldTogglePlay(anchorHands1, hands)){
  				if(this.startApplication){
+ 					var event = new CustomEvent('gesmo.gesture.startdectected');
+ 					window.dispatchEvent(event);
  					this.pausePlaying = true;
  					this.startApplication = false;
  					this.logger.log("gesture, grab, made to start application");
- 					var event = new CustomEvent('gesmo.gesture.startdectected');
- 					window.dispatchEvent(event);
- 					//this.pausePlaying = false;
+ 					setTimeout(function(){
+ 							this.pausePlaying = false;
+ 						}.bind(this), 400);
  					return;
  				} else {
  					this.logger.log("gesture, grab, made to play or pause");
  					if(this.player.state != GESMO.PLAYING 
- 					&& this.player.checkPlaylistState != GESMO.PLAYLISTEMPTY/* && this.startGesture*/){
+ 					&& this.player.checkPlaylistState != GESMO.PLAYLISTEMPTY && this.startGesture && !this.pausePlaying){
  						this.pausePlaying = true;
  						this.player.play(this.player.index);
- 						$(playBtn).fadeIn("slow", function(){
+ 						$(playBtn).fadeIn("slow");
+ 						setTimeout(function(){
  							$(playBtn).fadeOut("slow", function () {
  								this.pausePlaying = false;
  							}.bind(this));
- 						}.bind(this));
+ 						}.bind(this), 200);
  						return;
 	 				}
 
-	 				if(this.player.state == GESMO.PLAYING/* && this.startGesture*/){
+	 				if(this.player.state == GESMO.PLAYING && this.startGesture && !this.pausePlaying){
 	 					this.pausePlaying = true;
 	 					this.player.pause();
-	 					$(pauseBtn).fadeIn("slow", function(){
+	 					$(pauseBtn).fadeIn("slow");
+ 						setTimeout(function(){
  							$(pauseBtn).fadeOut("slow", function () {
  								this.pausePlaying = false;
  							}.bind(this));
- 						}.bind(this));
+ 						}.bind(this), 200);
 	 					return;
 	 				}
  				}
@@ -270,18 +265,18 @@
  					this.logger.log("gesture, grab and pull, made to moveInSection: up or down");
  				}
 	 			if(Math.abs(translation[1]) > 15){
-	 				this.swipedHorizontal = true;
- 					this.swipedVertical = true;
 	 				if(translation[1] < 0){
-	 					ui.moveInSection("up", function(){
+	 					ui.moveInSection("up");
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1100);
 	 				} else {
-	 					ui.moveInSection("down", function(){
+	 					ui.moveInSection("down"), 
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1100);
 	 				}
 	 			}
 	 		} else {
@@ -289,39 +284,39 @@
  					this.logger.log("gesture, grab and pull, made to moveToSection: left or right");
  				}
 	 			if(Math.abs(translation[0]) > 15){
-	 				this.swipedHorizontal = true;
- 					this.swipedVertical = true;
 	 				if(translation[0] > 0){
-	 					ui.moveToSection("left", function(){
+	 					ui.moveToSection("left");
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1200);
 	 				} else {
-	 					ui.moveToSection("right", function(){
+	 					ui.moveToSection("right");
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1200);
 	 				}
 	 			}
 	 		}
  		} else {
 	 		if(Math.abs(translation[2]) > Math.abs(translation[0])){
-	 			if(Math.abs(translation[2]) > 8){
+	 			if(Math.abs(translation[2]) > 10){
  					this.logger.log("gesture, grab and pull, made to moveInSection: forward or backward");
  				}
-	 			if(Math.abs(translation[2]) > 10){
-	 				this.swipedHorizontal = true;
- 					this.swipedVertical = true;
+	 			if(Math.abs(translation[2]) > 15){
 	 				if(translation[2] > 0){
-	 					ui.moveInSection("forward", function(){
+	 					ui.moveInSection("forward");
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1100);
 	 				} else {
-	 					ui.moveInSection("backward", function(){
+	 					ui.moveInSection("backward");
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1100);
 	 				}
 	 			}
 	 		} else {
@@ -329,18 +324,18 @@
  					this.logger.log("gesture, grab and pull, made to moveToSection: left or right");
  				}
 	 			if(Math.abs(translation[0]) > 15){
-	 				this.swipedHorizontal = true;
- 					this.swipedVertical = true;
 	 				if(translation[0] > 0){
-	 					ui.moveToSection("left", function(){
+	 					ui.moveToSection("left");
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1100);
 	 				} else {
-	 					ui.moveToSection("right", function(){
+	 					ui.moveToSection("right"), 
+	 					setTimeout(function(){
 	 						this.swipedHorizontal = false;
 	 						this.swipedVertical = false;
-	 					}.bind(this));
+	 					}.bind(this), 1100);
 	 				}
 	 			}
 	 		}

@@ -144,11 +144,9 @@ window.onload = function(){
 	});
 
 	window.addEventListener('gesmo.gesture.startdectected', function(event){
-		$("#playerContainer").fadeIn(function(){
-			$("#userMap").fadeIn("fast", function(){
-				ui.hideTitle();
-			}.bind(this));
-		}.bind(this));
+		$("#playerContainer").fadeIn("slow");
+		$("#userMap").fadeIn("slow");
+		ui.createHome();
 	}.bind(this));
 
 	window.addEventListener('gesmo.ui.setusermap', function(event){
@@ -158,10 +156,7 @@ window.onload = function(){
 		}.bind(this));
 		$(mapSections[ui.viewMode]).css({ border: "2px solid rgba(33, 148, 206, 1)",
 											background: "rgba(33, 148, 206, 0.25)"});
-		gestureController.pausePlaying = false;
 	}.bind(this));
-
-	//loop();
 }
 
 function loop(){

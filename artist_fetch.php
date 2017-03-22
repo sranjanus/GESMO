@@ -1,7 +1,8 @@
 <?php
 include_once 'dbconfig.php';
 
-$sql = "SELECT * FROM artists ORDER BY name";
+
+$sql = "SELECT * FROM artists ORDER BY name ASC";
 $result = mysqli_query($link, $sql) or die("Error in Selecting " . mysqli_error($link));
 
  $emparray = array();
