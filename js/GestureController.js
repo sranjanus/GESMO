@@ -304,7 +304,7 @@
 	 			if(Math.abs(translation[2]) > 10){
  					this.logger.log("gesture, grab and pull, made to moveInSection: forward or backward");
  				}
-	 			if(Math.abs(translation[2]) > 15){
+	 			if(Math.abs(translation[2]) > 8){
 	 				if(translation[2] > 0){
 	 					ui.moveInSection("forward");
 	 					setTimeout(function(){

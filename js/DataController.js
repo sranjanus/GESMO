@@ -7,8 +7,13 @@ GESMO.DataController.prototype = {
 	fetchData: function(searchQuery, onSuccess, onFailure) {
 		var completePath = this.urlPath;
 		switch(searchQuery.type){
+			case "home" : {
+				completePath += "fetchtotals.php";
+				break;
+			}
 			case "artists" : {
 				completePath += "artist_fetch.php";
+				completePath += "?limit=" + searchQuery.limit + "&offset=" + searchQuery.offset;
 				break;
 			}
 			case "genres" : {
