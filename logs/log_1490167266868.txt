@@ -1,0 +1,16 @@
+Log Start
+Array
+(
+    [0] => 22/03/2017:02:21:07,logger, created, logfile:  log_1490167266868.txt
+
+    [1] => 22/03/2017:02:21:07,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 22/03/2017:02:21:07,ui, complete, setup
+
+    [3] => 22/03/2017:02:21:10,ui, complete, start
+
+    [4] => 22/03/2017:02:21:12,datacontroller, sending request to, (http://localhost/Gesmo/fetchtotals.php) 
+
+    [5] => 22/03/2017:02:21:12,datacontroller, request failure, SyntaxError: Unexpected token < in JSON at position 0
+
+)

@@ -1,0 +1,28 @@
+Log Start
+Array
+(
+    [0] => 21/03/2017:13:50:52,logger, created, logfile:  log_1490122251595.txt
+
+    [1] => 21/03/2017:13:50:52,ui, loaded, http://localhost/GESMO/models/music_note.obj
+
+    [2] => 21/03/2017:13:50:52,ui, loaded, http://localhost/GESMO/models/record.obj
+
+    [3] => 21/03/2017:13:50:52,ui, loaded, http://localhost/GESMO/models/10.obj
+
+    [4] => 21/03/2017:13:50:52,ui, loaded, http://localhost/GESMO/models/guitar.obj
+
+    [5] => 21/03/2017:13:50:52,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [6] => 21/03/2017:13:50:52,ui, complete, setup
+
+    [7] => 21/03/2017:13:50:55,ui, complete, start
+
+    [8] => 21/03/2017:13:50:56,ui, complete, home
+
+    [9] => 21/03/2017:13:50:56,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=30) 
+
+    [10] => 21/03/2017:13:50:56,datacontroller, request success, status
+
+    [11] => 21/03/2017:13:50:58,ui, loaded, albums list
+
+)

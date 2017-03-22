@@ -1,0 +1,36 @@
+Log Start
+Array
+(
+    [0] => 21/03/2017:14:37:52,logger, created, logfile:  log_1490125071690.txt
+
+    [1] => 21/03/2017:14:37:52,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 21/03/2017:14:37:52,ui, complete, setup
+
+    [3] => 21/03/2017:14:37:55,ui, complete, start
+
+    [4] => 21/03/2017:14:37:57,ui, complete, home
+
+    [5] => 21/03/2017:14:37:57,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=30) 
+
+    [6] => 21/03/2017:14:37:57,datacontroller, request success, status
+
+    [7] => 21/03/2017:14:37:59,ui, loaded, albums list
+
+    [8] => 21/03/2017:14:38:05,datacontroller, sending request to, (http://localhost/Gesmo/Songalbum.php?album_id=11) 
+
+    [9] => 21/03/2017:14:38:05,ui, clicked, albums: Glory
+
+    [10] => 21/03/2017:14:38:05,datacontroller, request success, status
+
+    [11] => 21/03/2017:14:38:05,ui, loaded, songs list
+
+    [12] => 21/03/2017:14:38:09,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=30) 
+
+    [13] => 21/03/2017:14:38:09,ui, clicked, back: New Releases
+
+    [14] => 21/03/2017:14:38:09,datacontroller, request success, status
+
+    [15] => 21/03/2017:14:38:11,ui, loaded, albums list
+
+)

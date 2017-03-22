@@ -1,0 +1,86 @@
+Log Start
+Array
+(
+    [0] => 22/03/2017:15:56:14,logger, created, logfile:  log_1490216173921.txt
+
+    [1] => 22/03/2017:15:56:14,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 22/03/2017:15:56:14,ui, complete, setup
+
+    [3] => 22/03/2017:15:56:17,ui, complete, start
+
+    [4] => 22/03/2017:15:56:19,gesture, grab, made to start application
+
+    [5] => 22/03/2017:15:56:19,gesture, grab, made to play or pause
+
+    [6] => 22/03/2017:15:56:19,gesture, grab, made to play or pause
+
+    [7] => 22/03/2017:15:56:19,gesture, grab, made to play or pause
+
+    [8] => 22/03/2017:15:56:19,gesture, grab, made to play or pause
+
+    [9] => 22/03/2017:15:56:19,gesture, grab, made to play or pause
+
+    [10] => 22/03/2017:15:56:20,ui, complete, home
+
+    [11] => 22/03/2017:15:56:20,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=24) 
+
+    [12] => 22/03/2017:15:56:20,datacontroller, request success, status
+
+    [13] => 22/03/2017:15:56:21,ui, loaded, albums list
+
+    [14] => 22/03/2017:15:56:25,gesture, grab and pull, made to moveToSection: left or right
+
+    [15] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [16] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [17] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [18] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [19] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [20] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [21] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [22] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [23] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [24] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [25] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [26] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [27] => 22/03/2017:15:56:26,gesture, grab and pull, made to moveToSection: left or right
+
+    [28] => 22/03/2017:15:56:26,datacontroller, sending request to, (http://localhost/Gesmo/artist_fetch.php?limit=undefined&offset=undefined) 
+
+    [29] => 22/03/2017:15:56:26,ui, movedToSection, from 3to 2
+
+    [30] => 22/03/2017:15:56:26,datacontroller, request success, status
+
+    [31] => 22/03/2017:15:56:29,ui, loaded, artists list
+
+    [32] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [33] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [34] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [35] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [36] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [37] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [38] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [39] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+    [40] => 22/03/2017:15:56:33,gesture, grab and pull, made to moveToSection: left or right
+
+)

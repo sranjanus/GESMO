@@ -1,0 +1,26 @@
+Log Start
+Array
+(
+    [0] => 22/03/2017:00:26:11,logger, created, logfile:  log_1490160370412.txt
+
+    [1] => 22/03/2017:00:26:11,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 22/03/2017:00:26:11,ui, complete, setup
+
+    [3] => 22/03/2017:00:26:14,ui, complete, start
+
+    [4] => 22/03/2017:00:26:15,ui, complete, home
+
+    [5] => 22/03/2017:00:26:15,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=30) 
+
+    [6] => 22/03/2017:00:26:15,datacontroller, request success, status
+
+    [7] => 22/03/2017:00:26:17,ui, loaded, albums list
+
+    [8] => 22/03/2017:00:26:24,datacontroller, sending request to, (http://localhost/Gesmo/artist_fetch.php?limit=24&offset=0) 
+
+    [9] => 22/03/2017:00:26:24,ui, movedToSection, from 3to 2
+
+    [10] => 22/03/2017:00:26:24,datacontroller, request failure, SyntaxError: Unexpected token < in JSON at position 0
+
+)

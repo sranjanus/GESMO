@@ -1,0 +1,34 @@
+Log Start
+Array
+(
+    [0] => 22/03/2017:15:17:21,logger, created, logfile:  log_1490213840632.txt
+
+    [1] => 22/03/2017:15:17:21,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 22/03/2017:15:17:21,ui, complete, setup
+
+    [3] => 22/03/2017:15:17:24,ui, complete, start
+
+    [4] => 22/03/2017:15:17:25,gesture, grab, made to start application
+
+    [5] => 22/03/2017:15:17:25,gesture, grab, made to play or pause
+
+    [6] => 22/03/2017:15:17:25,gesture, grab, made to play or pause
+
+    [7] => 22/03/2017:15:17:25,gesture, grab, made to play or pause
+
+    [8] => 22/03/2017:15:17:25,gesture, grab, made to play or pause
+
+    [9] => 22/03/2017:15:17:25,gesture, grab, made to play or pause
+
+    [10] => 22/03/2017:15:17:25,gesture, grab, made to play or pause
+
+    [11] => 22/03/2017:15:17:26,ui, complete, home
+
+    [12] => 22/03/2017:15:17:26,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=24) 
+
+    [13] => 22/03/2017:15:17:26,datacontroller, request success, status
+
+    [14] => 22/03/2017:15:17:27,ui, loaded, albums list
+
+)

@@ -1,0 +1,56 @@
+Log Start
+Array
+(
+    [0] => 22/03/2017:15:20:41,logger, created, logfile:  log_1490214041333.txt
+
+    [1] => 22/03/2017:15:20:42,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 22/03/2017:15:20:42,ui, complete, setup
+
+    [3] => 22/03/2017:15:20:45,ui, complete, start
+
+    [4] => 22/03/2017:15:20:45,gesture, grab, made to start application
+
+    [5] => 22/03/2017:15:20:45,gesture, grab, made to play or pause
+
+    [6] => 22/03/2017:15:20:45,gesture, grab, made to play or pause
+
+    [7] => 22/03/2017:15:20:45,gesture, grab, made to play or pause
+
+    [8] => 22/03/2017:15:20:45,gesture, grab, made to play or pause
+
+    [9] => 22/03/2017:15:20:45,gesture, grab, made to play or pause
+
+    [10] => 22/03/2017:15:20:46,ui, complete, home
+
+    [11] => 22/03/2017:15:20:46,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=24) 
+
+    [12] => 22/03/2017:15:20:46,datacontroller, request success, status
+
+    [13] => 22/03/2017:15:20:47,ui, loaded, albums list
+
+    [14] => 22/03/2017:15:20:52,gesture, pinch, made
+
+    [15] => 22/03/2017:15:20:52,datacontroller, sending request to, (http://localhost/Gesmo/Songalbum.php?album_id=11) 
+
+    [16] => 22/03/2017:15:20:52,ui, clicked, albums: Glory
+
+    [17] => 22/03/2017:15:20:52,datacontroller, request success, status
+
+    [18] => 22/03/2017:15:20:52,ui, loaded, songs list
+
+    [19] => 22/03/2017:15:20:52,gesture, pinch, made
+
+    [20] => 22/03/2017:15:20:55,gesture, pinch, made
+
+    [21] => 22/03/2017:15:20:55,ui, clicked, songs: Toxic
+
+    [22] => 22/03/2017:15:20:56,gesture, pinch, made
+
+    [23] => 22/03/2017:15:20:56,ui, songchange, from0 to 0
+
+    [24] => 22/03/2017:15:20:58,player, loaded, http://localhost/Gesmo/uploads/97644-toxic.mp3
+
+    [25] => 22/03/2017:15:20:58,player, played, http://localhost/Gesmo/uploads/97644-toxic.mp3
+
+)

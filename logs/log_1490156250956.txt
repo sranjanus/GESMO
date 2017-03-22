@@ -1,0 +1,20 @@
+Log Start
+Array
+(
+    [0] => 21/03/2017:23:17:31,logger, created, logfile:  log_1490156250956.txt
+
+    [1] => 21/03/2017:23:17:31,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 21/03/2017:23:17:31,ui, complete, setup
+
+    [3] => 21/03/2017:23:17:35,ui, complete, start
+
+    [4] => 21/03/2017:23:17:38,ui, complete, home
+
+    [5] => 21/03/2017:23:17:38,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=30) 
+
+    [6] => 21/03/2017:23:17:38,datacontroller, request success, status
+
+    [7] => 21/03/2017:23:17:40,ui, loaded, albums list
+
+)

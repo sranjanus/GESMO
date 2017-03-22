@@ -184,6 +184,8 @@
 	// 	this.logger.log("ui, loaded, http://localhost/GESMO/models/10.obj");
 	// }.bind(this));
 
+	this.textureLoader = new THREE.TextureLoader();
+
 	var fontLoader = new THREE.FontLoader();
 	fontLoader.load("http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json", function(font){
 		this.titleFont = font;
@@ -270,24 +272,30 @@ GESMO.GesmoUI.prototype = {
 		tween1.start();
  	},
 
+ 	hideTitle: function(){
+ 	// 	new TWEEN.Tween(this.name.material)
+ 	// 		.to({opacity: 0}, 200)
+ 	// 		.onComplete(function(){
+ 	// 			this.scene.remove(this.name);
+ 	// 		}.bind(this))
+ 	// 		.start();
+
+		// new TWEEN.Tween(this.message.material)
+		// 	.to({opacity: 0}, 200)
+		// 	.onComplete(function () {
+		// 		this.scene.remove(this.message);
+		// 		this.createHome();
+		// 	}.bind(this))
+		// 	.start();
+
+		this.scene.remove(this.name);
+		this.scene.remove(this.message);
+		this.createHome();
+ 	},
+
  	createHome: function(){
- 		new TWEEN.Tween(this.name.material)
- 			.to({opacity: 0}, 1500)
- 			.onComplete(function(){
- 				this.scene.remove(this.name);
- 			}.bind(this))
- 			.start();
-
-		new TWEEN.Tween(this.message.material)
-			.to({opacity: 0}, 1500)
-			.onComplete(function () {
-				this.scene.remove(this.message);
-			}.bind(this))
-			.start();
-
-
+ 		$(loading).fadeIn();
 		this.appStarted = true;
-
  		var incr = (2*Math.PI)/this.mainList.length;
 
  		for(var i = 0, theta = 0;i < this.mainList.length; i++, theta += incr){
@@ -332,7 +340,7 @@ GESMO.GesmoUI.prototype = {
  		var searchQuery = {
  			type: "albums",
 			filterName: "mostRecent",
-			filterValue: 30
+			filterValue: 24
 		};
 		this.logger.log("ui, complete, home");
 		this.fetchLibrary(searchQuery);
@@ -361,10 +369,9 @@ GESMO.GesmoUI.prototype = {
  				//this.musicLibrary.remove(libMesh);
  			var flabel = libMesh.getObjectByName("flabel");
  			libMesh.remove(flabel);
- 			var llabel = libMesh.getObjectByName("llabel");
- 			libMesh.remove(llabel);
 
  			var image = libMesh.getObjectByName("image_plane");
+ 			image.material.map.needsUpdate = false;
  			libMesh.remove(image);
  				
  			var targetPos = libMesh.userData.position;
@@ -381,7 +388,7 @@ GESMO.GesmoUI.prototype = {
  			libMesh.scale.x = targetSca.x;
  			libMesh.scale.y = targetSca.y;
  			libMesh.scale.z = targetSca.z;
- 			this.scene.add(libMesh);
+ 			this.movableObjects.add(libMesh);
  		}
 
  		if(callback != null){
@@ -416,6 +423,7 @@ GESMO.GesmoUI.prototype = {
 	 		}
 
 			this.libElements[this.viewMode].push(itemMesh);
+			this.movableObjects.remove(itemMesh);
 			this.sections[this.viewMode].add(itemMesh);
 	 	}
  		this.assignTargets(type, null, null);
@@ -467,36 +475,6 @@ GESMO.GesmoUI.prototype = {
 		if(!isButton){
 			fnameLabel.position.y = -70;
 		}
-		
-		
-
-		// fnameLabel.translateZ(8);
-		// fnameLabel.translateX(-bSize/2);
-
-
-		// if(names.length == 2){
-		// 	fnameLabel.translateY(size)
-		// 	var lnameGeometry = new THREE.TextGeometry(names[1], {
-		// 		size: size,
-		// 		height: 0,
-		// 		bevelEnabled: false,
-		// 		font: this.titleFont,
-		// 		weigth: "normal"
-		// 	});
-
-		// 	var lnameLabel = new THREE.Mesh(lnameGeometry, nameMaterial);
-		// 	lnameLabel.name = "llabel";
-		// 	mesh.add(lnameLabel);
-
-		// 	var lbox = new THREE.Box3().setFromObject(lnameLabel);
-		// 	var lSize = lbox.getSize().x;
-
-		// 	halfDiff = (bSize - lSize)/2;
-
-		// 	lnameLabel.translateZ(10);
-		// 	lnameLabel.translateY((-1)*size);
-		// 	lnameLabel.translateX(-lSize/2-halfDiff);
-		// }
 	},
 
 	addImage: function (mesh) {
@@ -505,7 +483,6 @@ GESMO.GesmoUI.prototype = {
 			imagePath += mesh.userData.image;
 		} else {
 			var colorIndex = Math.floor(Math.random()*10) + 1;
-			console.log(colorIndex);
 			var type = mesh.userData.type;
 			if(type == "albums"){
 				imagePath += "album_flat_" + colorIndex + ".png";
@@ -518,53 +495,35 @@ GESMO.GesmoUI.prototype = {
 			}
 		}
 		
-		var img = new THREE.MeshPhongMaterial({
-			map:THREE.ImageUtils.loadTexture(imagePath),
-			side: THREE.DoubleSide
-		});
-		img.map.needsUpdate = true;
-
-		var planeHt, planeWd;
-		if(mesh.geometry.parameters){
-			planeHt = mesh.geometry.parameters.height;
-			planeWd = mesh.geometry.parameters.width;
-		} else {
-			planeHt = 70;
-			planeWd = 70;
-		}
-
-		var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeWd, planeHt), img);
-		plane.overdraw = true;
-		plane.name = "image_plane";
-		mesh.add(plane);
-
-		// var fig = new THREE.Group();
-		// var modelToClone;
-		// var type = mesh.userData.type;
-		// 	if(type == "albums"){
-		// 		modelToClone = this.record_model;
-		// 	} else if(type == "artists"){
-		// 		modelToClone = this.guitar_model;
-		// 	} else if(type == "genres"){
-		// 		modelToClone = this.ten_model;
-		// 	} else{
-		// 		modelToClone = this.note_model;
-		// 	}
-
-		// fig.add(new THREE.Mesh(modelToClone.children[0].geometry.clone(), modelToClone.children[0].material.clone()));
-		// fig.rotation.x = modelToClone.rotation.x;
-		// fig.rotation.y = modelToClone.rotation.y;
-		// fig.rotation.z = modelToClone.rotation.z;
-		// fig.scale.x = modelToClone.scale.x;
-		// fig.scale.y = modelToClone.scale.y;
-		// fig.scale.z = modelToClone.scale.z;
-		// fig.name = "image_plane";
-		// fig.children.forEach(function (child) {
-		// 	child.material.color = mesh.material.color;
-		// 	child.material.needsUpdate = true;
-		// }.bind(this));
 		
-		// mesh.add(fig);
+		this.textureLoader.load(
+			imagePath,
+			function(texture){
+				var img = new THREE.MeshPhongMaterial({
+					side: THREE.DoubleSide,
+					map: texture
+				});
+				img.map.needsUpdate = true;
+				var planeHt, planeWd;
+				if(mesh.geometry.parameters){
+					planeHt = mesh.geometry.parameters.height;
+					planeWd = mesh.geometry.parameters.width;
+				} else {
+					planeHt = 70;
+					planeWd = 70;
+				}
+
+				var plane = new THREE.Mesh(new THREE.PlaneGeometry(planeWd, planeHt), img);
+				plane.overdraw = true;
+				plane.name = "image_plane";
+				mesh.add(plane);
+			}.bind(this),
+			function ( xhr ) {
+				console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+			},	
+			function ( xhr ) {
+				console.log( 'An error happened' );
+			});
 	},
 
 	assignTargets: function(type, start, end){
@@ -598,7 +557,6 @@ GESMO.GesmoUI.prototype = {
 
 			}
 		} else if(type == "songs") {
-			console.log('here');
 			for ( var i = 0; i < this.libElements[this.viewMode].length; i ++ ) {
 
 				var itemGeom = new THREE.PlaneGeometry(1, 1);
@@ -640,28 +598,39 @@ GESMO.GesmoUI.prototype = {
 			var object = this.libElements[this.viewMode][ i ];
 			var target = (targets.length) ? targets[i] : targets;
 
+			// object.position.x = target.position.x;
+			// object.position.y = target.position.y;
+			// object.position.z = target.position.z;
+
+			object.rotation.x = target.rotation.x;
+			object.rotation.y = target.rotation.y;
+			object.rotation.z = target.rotation.z;
+
+			object.material.opacity = 0;
+
 			new TWEEN.Tween( object.position )
-				.to( { x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration )
+				.to( { x: target.position.x, y: target.position.y, z: target.position.z }, 1500 )
 				.easing( TWEEN.Easing.Exponential.InOut )
 				.start();
 
-			new TWEEN.Tween( object.scale )
-				.to({x: 1, y: 1, z: 1}, Math.random() * duration + duration)
-				.start();
-
 			new TWEEN.Tween( object.rotation )
-				.to( { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration )
+				.to( { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, 1500 )
 				.easing( TWEEN.Easing.Exponential.InOut )
 				.start();
 
 			new TWEEN.Tween(object.material)
-				.to({opacity: 0}, Math.random() * duration + duration)
+				.to({opacity: 0}, 1500)
 				.easing( TWEEN.Easing.Exponential.InOut )
 				.start();
+
+			new TWEEN.Tween( object.scale )
+				.to({x: 1, y: 1, z: 1}, 1500)
+				.start();
+
 		}
 
 		new TWEEN.Tween( this )
-			.to( {}, duration * 2 )
+			.to( {}, 1500 )
 			.onUpdate( this.render )
 			.onComplete(function(){
 	 			$(loading).fadeOut();
@@ -852,9 +821,8 @@ GESMO.GesmoUI.prototype = {
 
  	onClick: function(event){
  		if(!this.appStarted){
- 		// 	$("#playerContainer").fadeIn("slow");
-			// $("#userMap").fadeIn("slow");
-			// this.createHome();
+ 			var event = new CustomEvent('gesmo.gesture.startdectected');
+ 			window.dispatchEvent(event);
  			return;
  		}
 
@@ -944,21 +912,42 @@ GESMO.GesmoUI.prototype = {
  				this.moveToSection("right", null);
  				break;
  			}
+
+ 			case "e": {
+ 				this.moveInSection("forward", null);
+ 				break;
+ 			}
+
+ 			case "d": {
+ 				this.moveInSection("backward", null);
+ 			}
  		}
+
+ 		console.log(event);
  	},
 
  	moveToSection: function(direction, callback){
+ 		console.log('here1');
  		if(!this.isRotating && !this.isTranslating){
  			TWEEN.removeAll();
  			this.isRotating = true;
 	 		var curYRot = this.musicLibrary.rotation.y;
 
-	 		var tween1 = new TWEEN.Tween(this.movableObjects.position)
-	 		.easing( TWEEN.Easing.Exponential.InOut )
+	 		var goBack = false;
+	 		if(this.movableObjects.position.z != 0){
+	 			goBack = true;
+	 		}
+
+	 		var tween1;
+	 		if(goBack){
+	 			tween1 = new TWEEN.Tween(this.movableObjects.position)
+	 				.easing( TWEEN.Easing.Exponential.InOut )
 	 				.onComplete(function(){
 	 					this.movableObjects.savedPos.copy(this.movableObjects.position);
 	 				}.bind(this))
-	 				.to({ x: 0, y : 0, z: 0}, 100);
+	 				.to({ x: 0, y : 0, z: 0}, 200);
+	 		}
+	 		
 
 	 		var tween2;
 	 		var tween3;
@@ -975,11 +964,11 @@ GESMO.GesmoUI.prototype = {
 				 		if(this.viewMode > this.mainList.length - 1) this.viewMode = 0;
 				 		this.loadSection();
 				 		this.isRotating = false;
-				 		if(callback != null)
-				 			callback();
 				 		var event = new CustomEvent('gesmo.ui.setusermap');
 				 		this.logger.log("ui, movedToSection, from " + oldView + "to " + this.viewMode);
 				 		window.dispatchEvent(event);
+				 		if(callback != null)
+				 			callback();
 				 	}.bind(this));
 
 				 tween3 = new TWEEN.Tween(this.btnLibrary.rotation)
@@ -997,11 +986,11 @@ GESMO.GesmoUI.prototype = {
 				 		if(this.viewMode < 0) this.viewMode = this.mainList.length - 1;
 				 		this.loadSection();
 				 		this.isRotating = false;
-				 		if(callback != null)
-				 			callback();
 				 		var event = new CustomEvent('gesmo.ui.setusermap');
 				 		this.logger.log("ui, movedToSection, from " + oldView + "to " + this.viewMode);
-				 			window.dispatchEvent(event);
+				 		window.dispatchEvent(event);
+				 		if(callback != null)
+				 			callback();
 				 	}.bind(this));
 
 				 tween3 = new TWEEN.Tween(this.btnLibrary.rotation)
@@ -1009,8 +998,12 @@ GESMO.GesmoUI.prototype = {
 				 	.easing( TWEEN.Easing.Exponential.InOut);
 			}
 
-			tween1.chain(tween2);
-			tween1.start();
+			if(goBack){
+				tween1.chain(tween2);
+				tween1.start();
+			} else {
+				tween2.start();
+			}
 			tween3.start();
  		}
  	},
@@ -1198,12 +1191,12 @@ GESMO.GesmoUI.prototype = {
 		this.sections[this.viewMode].add(copy);
 
 		new TWEEN.Tween(copy.scale)
-			.to({ x: 0.1, y: 0.1, z: 0.1}, Math.random() * 500 + 500)
+			.to({ x: 0.1, y: 0.1, z: 0.1}, 500)
 			.start();
 
 
 		new TWEEN.Tween( copy.position )
-				.to( { x: 0, y: 200, z: -this.movableObjects.position.z }, Math.random() * 1500 + 1500 )
+				.to( { x: 0, y: 200, z: -this.movableObjects.position.z }, 1000 )
 				.easing( TWEEN.Easing.Quadratic.InOut )
 				.onComplete(function(){
 						this.sections[this.viewMode].remove(copy);

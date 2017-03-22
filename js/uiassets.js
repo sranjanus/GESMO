@@ -607,7 +607,7 @@ GESMO.Pilot =function(){
  };
 
  GESMO.SpaceDebris= function(env){
-	var nClouds = 40;
+	var nClouds = 10;
  	var stepAngle = Math.PI/nClouds*2;
  	this.clouds = [];
 
@@ -615,10 +615,10 @@ GESMO.Pilot =function(){
 
  	for (var j = 0;j < nClouds;j++){
  		var b = stepAngle*j;
- 		var t = 3250 + Math.random()*1000;
+ 		var t = 1500 + Math.random()*1000;
 	 	for(var i = 0;i < nClouds;i++){
 	 		var a = stepAngle*i;
-		 	var h = 3250 + Math.random()*1000;
+		 	var h = 1500 + Math.random()*1000;
 	 		for(var k = 0;k < 3;k++){
 	 			var mat = new THREE.MeshPhongMaterial({
 						color: Math.random() * 0xffffff - 0x110000,

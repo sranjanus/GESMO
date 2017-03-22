@@ -1,0 +1,34 @@
+Log Start
+Array
+(
+    [0] => 22/03/2017:03:38:09,logger, created, logfile:  log_1490171888825.txt
+
+    [1] => 22/03/2017:03:38:09,ui, loaded, http://localhost/GESMO/fonts/droid/droid_serif_regular.typeface.json
+
+    [2] => 22/03/2017:03:38:09,ui, complete, setup
+
+    [3] => 22/03/2017:03:38:12,ui, complete, start
+
+    [4] => 22/03/2017:03:38:13,datacontroller, sending request to, (http://localhost/Gesmo/fetchtotals.php) 
+
+    [5] => 22/03/2017:03:38:13,datacontroller, request success, status
+
+    [6] => 22/03/2017:03:38:13,ui, complete, home
+
+    [7] => 22/03/2017:03:38:13,datacontroller, sending request to, (http://localhost/Gesmo/newReleases.php?mostRecent=30) 
+
+    [8] => 22/03/2017:03:38:14,datacontroller, request success, status
+
+    [9] => 22/03/2017:03:38:15,ui, loaded, albums list
+
+    [10] => 22/03/2017:03:38:21,datacontroller, sending request to, (http://localhost/Gesmo/artist_fetch.php?limit=24&offset=0) 
+
+    [11] => 22/03/2017:03:38:21,ui, movedToSection, from 3to 2
+
+    [12] => 22/03/2017:03:38:21,datacontroller, request success, status
+
+    [13] => 22/03/2017:03:38:22,ui, loaded, artists list
+
+    [14] => 22/03/2017:03:38:28,ui, movedInSection, 2 by 1000 z
+
+)
