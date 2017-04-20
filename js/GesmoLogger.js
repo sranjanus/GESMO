@@ -1,9 +1,9 @@
 GESMO.Logger = function(){
 	this.urlPath = "http://localhost/Gesmo/";
 	this.logs = [];
-	setTimeout(function(){
-	 	this.saveLogs();
-	}.bind(this), 20000);
+	// setTimeout(function(){
+	//  	this.saveLogs();
+	// }.bind(this), 20000);
 	this.fileName = "";
 };
 

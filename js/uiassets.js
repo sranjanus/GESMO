@@ -611,14 +611,14 @@ GESMO.Pilot =function(){
  	var stepAngle = Math.PI/nClouds*2;
  	this.clouds = [];
 
-	var geom = new THREE.BoxGeometry(70, 70, 20);
+	var geom = new THREE.PlaneBufferGeometry(10, 10);
 
  	for (var j = 0;j < nClouds;j++){
  		var b = stepAngle*j;
- 		var t = 1500 + Math.random()*1000;
+ 		var t = 1000 + Math.random()*200;
 	 	for(var i = 0;i < nClouds;i++){
 	 		var a = stepAngle*i;
-		 	var h = 1500 + Math.random()*1000;
+		 	var h = 1000 + Math.random()*200;
 	 		for(var k = 0;k < 3;k++){
 	 			var mat = new THREE.MeshPhongMaterial({
 						color: Math.random() * 0xffffff - 0x110000,
@@ -627,8 +627,8 @@ GESMO.Pilot =function(){
 						opacity: 1
 				});
 			 	var m = new THREE.Mesh(geom.clone(), mat);
-			 	var s = 0.1 + Math.random()*0.4;
-	 			m.scale.set(s, s, s);
+			 	// var s = 0.1 + Math.random()*0.4;
+	 			// m.scale.set(s, s, s);
 
 	 			m.castShadow = true;
 	 			m.receiveShadow = true;

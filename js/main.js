@@ -7,11 +7,10 @@ var searchQueries = [];
 var mapSections = [];
 
 window.onload = function(){
-	var secs = $("#userMap").find('.box');
-	mapSections.push(secs[2]);
-	mapSections.push(secs[3]);
-	mapSections.push(secs[1]);
-	mapSections.push(secs[0])
+	var tds = $("#userMap").find('td');
+	for(var i = 0;i < tds.length;i++){
+		mapSections.push(tds[i]);
+	}
 
 	var tutLinks = $("#tuts").find('.box');
 	tutLinks.each(function(index){
@@ -68,6 +67,7 @@ window.onload = function(){
 			}
 
 			default: {
+				console.log('here1');
 				dataController.fetchData(event.detail.query, dataFetched, dataFetchFailed);
 				searchQueries[secno].push(event.detail.query);
 			}
@@ -92,19 +92,11 @@ window.onload = function(){
 	}.bind(this));
 
 	window.addEventListener('gesmo.ui.startcomplete', function(){
-		//gestureController.setStartGesture();
+
 	}.bind(this));
 
 	window.addEventListener('resize', function(event){
 		ui.onWindowResize();
-	}.bind(this), false);
-
-	document.addEventListener('mousedown', function(event){
-		ui.onMouseDown(event);
-	}.bind(this), false);
-
-	document.addEventListener('mouseup', function(event) {
-		ui.onMouseUp(event);
 	}.bind(this), false);
 
 	document.addEventListener('mousemove', function(event) {
@@ -153,12 +145,9 @@ window.onload = function(){
 
 	window.addEventListener('gesmo.ui.setusermap', function(event){
 		mapSections.forEach(function(sec){
-			$(sec).css({ border: "2px solid rgba(33, 148, 206, 0.25)",
-						  background: "transparent" });
+			$(sec).removeClass("selected");
 		}.bind(this));
-		$(mapSections[ui.viewMode]).css({ border: "2px solid rgba(33, 148, 206, 1)",
-											background: "rgba(33, 148, 206, 0.25)"});
-		gestureController.pausePlaying = false;
+		$(mapSections[ui.viewMode]).addClass("selected");
 	}.bind(this));
 
 	//loop();
@@ -170,20 +159,42 @@ function loop(){
 }
 
 function dataFetched(type, data){
-	if(!gestureController.startGesture){
-		gestureController.startGesture = true;
+	if(type == "playlistsongs"){
+
+		var dataList = [];
+		loadedData.length = 0;
+
+		if(this.player.state != GESMO.STOPPED){
+			this.player.stop();
+		}
+
+		this.player.playlist.length = 0;
+		data.forEach(function(item){
+			dataList.push({
+				name: item.name,
+				id: item.id,
+				image: item.image
+			});
+			loadedData.push(item);
+
+			this.player.playlist.push(item);
+		}.bind(this));
+
+		this.player.play(0);
+	} else {
+		var dataList = [];
+		loadedData.length = 0;
+		data.forEach(function(item){
+			dataList.push({
+				name: item.name,
+				id: item.id,
+				image: item.image
+			});
+			loadedData.push(item);
+		}.bind(this));
+		ui.showLibrary(type, dataList);
 	}
-	var dataList = [];
-	loadedData.length = 0;
-	data.forEach(function(item){
-		dataList.push({
-			name: item.name,
-			id: item.id,
-			image: item.image
-		});
-		loadedData.push(item);
-	}.bind(this));
-	ui.showLibrary(type, dataList);
+
 }
 
 function dataFetchFailed(error){

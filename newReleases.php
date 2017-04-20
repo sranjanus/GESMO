@@ -5,7 +5,7 @@ $uri = $_SERVER['QUERY_STRING'];
 parse_str($uri, $output);
 $count = intval($output['mostRecent']);
 
-$sql = "SELECT * FROM albums ORDER BY release_date DESC LIMIT $count";
+$sql = "SELECT * FROM albums ORDER BY release_date DESC LIMIT 16";
 $result = mysqli_query($link, $sql) or die("Error in Selecting " . mysqli_error($link));
 
  $emparray = array();
